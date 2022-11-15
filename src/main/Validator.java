@@ -237,7 +237,8 @@ public class Validator {
 		}
 
 		// Validate variable name
-		if(variableName.startsWith("_") || variableName.startsWith("$") || Character.isLetter(variableName.charAt(0))) {
+//		if(variableName.startsWith("_") || variableName.startsWith("$") || Character.isLetter(variableName.charAt(0))) {
+		if(variableName.matches("[A-z$_]{1}[A-z0-9$_]*")) {
 			declaredVariables.put(variableName, type);
 			return true;
 		}
