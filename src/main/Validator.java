@@ -1,5 +1,8 @@
 package main;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -7,6 +10,7 @@ import java.util.Stack;
 
 public class Validator {
 	private Scanner code; // Shouldn't be touched outside of this class
+	private ArrayList<String> reservedKeywords;
 	private Map<String, DataType> declaredVariables;
 	private boolean isValidated;
 	private boolean isValid;
@@ -19,10 +23,12 @@ public class Validator {
 //		scan.useDelimiter(";"); // TODO This delimiter may need to be changed
 //		Should it be \n? How do we evaluate a file with no line breaks, could we recurse when we hit a ;?
 		
+		getReservedKeywords();
 		declaredVariables = new HashMap<>();
 		isValidated = false;
 		isValid = false; // Assume invalid
 	}
+	
 	/**
 	 * Tests if the file scanned by Scanner object contains valid Java code.
 	 * @param scan
@@ -161,6 +167,11 @@ public class Validator {
 	 */
 	public DataType getType(String data) {
 		// TODO Sam
+		// Check empty string (Edge case)
+		if(data.isBlank()) {
+			return null;
+		}
+		
 		// Check if data passed is a variable, get datatype from the declared variable map
 		if(declaredVariables.containsKey(data)) {
 			return declaredVariables.get(data);
@@ -182,6 +193,8 @@ public class Validator {
 		if(data.equals("true") || data.equals("false")) {
 			return DataType.BOOLEAN;
 		}
+		// check if it's a boolean expression
+		//TODO Sam
 		
 		// check char
 		if(data.length() == 3 && data.charAt(0) == '\'' &&  data.charAt(2) == '\'') {
@@ -205,16 +218,50 @@ public class Validator {
 		this.isValid = isValid;
 	}
 	
+	/**
+	 * Adds a variable to the list of declared variables
+	 * @param variableName
+	 * @param type
+	 * @return True if successful, false if failed.
+	 */
+	public boolean addVariable(String variableName, DataType type) {
+		// Check if variableName is a reserved keyword
+		if(reservedKeywords.contains(variableName)) {
+			return false;
+		}
+		
+		// check if variable was declared previously
+		// .get will not return null if it has been declared previously
+		if(declaredVariables.get(variableName) != null) {
+			return false;
+		}
+
+		// Validate variable name
+		if(variableName.startsWith("_") || variableName.startsWith("$") || Character.isLetter(variableName.charAt(0))) {
+			declaredVariables.put(variableName, type);
+			return true;
+		}
+		
+		// All previous attempts to validate the variable name have failed, assume invalid
+		return false;
+	}
 	
-	
-}
-enum DataType{
-//	BYTE,
-//	SHORT,
-//	LONG,
-//	FLOAT, // Removed for main project, added as stretch goal
-	INT,
-	DOUBLE,
-	BOOLEAN,
-	CHAR
+	/**
+	 * Reads in Java Reserved Keywords from file
+	 * @return List of reserved keywords
+	 */
+	private ArrayList<String> getReservedKeywords(){
+		Scanner s = null;
+		try {
+			s = new Scanner(new File("ReservedKeywords.txt"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		reservedKeywords = new ArrayList<String>();
+		while (s.hasNext()){
+		    reservedKeywords.add(s.next());
+		}
+		s.close();
+		return reservedKeywords;
+	}
 }
