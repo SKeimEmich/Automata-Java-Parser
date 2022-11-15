@@ -59,6 +59,7 @@ public class Validator {
 		// TODO Sam
 		// if not valid IF, throw Exception
 		// Check if it contains a valid bool
+		// inc first index, exc last index
 		// Check if it contains a valid statement or compound statement
 		return true;
 	}
@@ -161,10 +162,33 @@ public class Validator {
 	public DataType getType(String data) {
 		// TODO Sam
 		// Check if data passed is a variable, get datatype from the declared variable map
-		// Okay this could be gross but here's my thoughts
-		// Try to parse the string with Integer.parseInt(data)
-		// if it does not throw an error, congrats, it's an int
-		// if it does throw an error, try the next datatype -- Sam
+		if(declaredVariables.containsKey(data)) {
+			return declaredVariables.get(data);
+		}
+		
+		// check int
+		try {
+			Integer.parseInt(data);
+			return DataType.INT;
+		} catch (NumberFormatException nfe) {}
+
+		// check double
+		try {
+			Double.parseDouble(data);
+			return DataType.DOUBLE;
+		} catch (NumberFormatException nfe) {}
+		
+		// check boolean
+		if(data.equals("true") || data.equals("false")) {
+			return DataType.BOOLEAN;
+		}
+		
+		// check char
+		if(data.length() == 3 && data.charAt(0) == '\'' &&  data.charAt(2) == '\'') {
+			return DataType.CHAR;
+		}
+		
+		// Throw an error at this point? We haven't found a matching DataType so it's invalid code?
 		return null;
 	}
 	
