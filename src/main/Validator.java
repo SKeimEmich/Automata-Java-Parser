@@ -222,7 +222,7 @@ public class Validator {
 	 * Adds a variable to the list of declared variables
 	 * @param variableName
 	 * @param type
-	 * @return True if successful, false if failed.
+	 * @return True if successful, false if failed (Nothing was added to the map).
 	 */
 	public boolean addVariable(String variableName, DataType type) {
 		// Check if variableName is a reserved keyword
@@ -236,8 +236,7 @@ public class Validator {
 			return false;
 		}
 
-		// Validate variable name
-//		if(variableName.startsWith("_") || variableName.startsWith("$") || Character.isLetter(variableName.charAt(0))) {
+		// Validate variable name (Can begin with alphanumeric or $, followed by any alphanumeric, digit, $ or _)
 		if(variableName.matches("[A-z$_]{1}[A-z0-9$_]*")) {
 			declaredVariables.put(variableName, type);
 			return true;

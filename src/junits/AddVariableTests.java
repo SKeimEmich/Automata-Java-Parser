@@ -17,6 +17,8 @@ class AddVariableTests {
 		assertTrue(validator.addVariable("i", DataType.INT));
 		assertTrue(validator.addVariable("$i", DataType.INT));
 		assertTrue(validator.addVariable("$", DataType.INT));
+		assertTrue(validator.addVariable("$123", DataType.INT));
+		assertTrue(validator.addVariable("$abc123", DataType.INT));
 	}
 	@Test
 	void testInvalidStartingCharacter() {
@@ -29,6 +31,10 @@ class AddVariableTests {
 	@Test
 	void testInvalidKeyword() {
 		assertFalse(validator.addVariable("if", DataType.INT));
+	}
+	@Test
+	void testInvalidBlank() {
+		assertFalse(validator.addVariable("      ", DataType.INT));
 	}
 	@Test
 	void testInvalidAlreadyExists() {
