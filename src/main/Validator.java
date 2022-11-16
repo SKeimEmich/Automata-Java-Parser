@@ -78,6 +78,7 @@ public class Validator {
 	}
 	
 	/**
+	 * //todo Jon
 	 * Returns true if the string passed is a valid for loop
 	 * @param forLoop
 	 * @return true if forLoop contains a valid loop
@@ -111,6 +112,7 @@ public class Validator {
 	}
 	
 	/**
+	 * todo Jon
 	 * Returns true if the string passed is a valid simple statement
 	 * @param simpleStatement
 	 * @return True if simple statement is valid
@@ -141,6 +143,7 @@ public class Validator {
 	}
 	
 	/**
+	 * Todo: Jon
 	 * Returns true if the string passed is a valid method signature
 	 * @param methodSignature
 	 * @return True if the method signature is valid
