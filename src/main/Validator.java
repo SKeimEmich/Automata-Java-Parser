@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Validator {
 	private Scanner code; // Shouldn't be touched outside of this class
@@ -15,49 +17,52 @@ public class Validator {
 	private boolean isValidated;
 	private boolean isValid;
 	private Stack<Character> parens;
-	
+
 	public Validator(String filename) {
 		// TODO Fix this so it reads file as scanner object
 		code = null;
-		
+
 //		scan.useDelimiter(";"); // TODO This delimiter may need to be changed
 //		Should it be \n? How do we evaluate a file with no line breaks, could we recurse when we hit a ;?
-		
+
 		getReservedKeywords();
 		declaredVariables = new HashMap<>();
 		isValidated = false;
 		isValid = false; // Assume invalid
 	}
-	
+
 	/**
 	 * Tests if the file scanned by Scanner object contains valid Java code.
+	 * 
 	 * @param scan
 	 */
 	public void validate() {
 		// check if the code has been scanned already, escape to prevent duplicate scans
-		
-		
+
 		String nextLine;
-		while(code.hasNext()) {
+		while (code.hasNext()) {
 			nextLine = code.next(); // Uses delimiter outlined when scanner was constructed
-			if(nextLine.contains("if(") || nextLine.contains("if (")) { // There's probably a way to check with a regex?
-				if(isValidIf(nextLine)) {
-					
+			if (nextLine.contains("if(") || nextLine.contains("if (")) { // There's probably a way to check with a
+																			// regex?
+				if (isValidIf(nextLine)) {
+
 				} else {
 					return; // Not valid, exit method
 				}
 			}
 		}
-		
-		
-		// Assume that if the code has reached this point of execution, then it has found no errors (Error causes early exiting)
+
+		// Assume that if the code has reached this point of execution, then it has
+		// found no errors (Error causes early exiting)
 		isValid = true;
 		isValidated = true;
-		return; 
+		return;
 	}
-	
+
 	/**
-	 * Tests if the string passed is a valid if statement and it contains a valid statement or code block.
+	 * Tests if the string passed is a valid if statement and it contains a valid
+	 * statement or code block.
+	 * 
 	 * @param ifBlock
 	 * @return True if if-block is valid, false if error is encountered.
 	 */
@@ -65,66 +70,88 @@ public class Validator {
 		// TODO Sam
 		// if not valid IF, throw Exception
 		// Check if it contains a valid bool
-		if(ifBlock.matches("\\s*if\\s?\\(.+\\).*")) {
+		if (ifBlock.matches("\\s*if\\s?\\(.+\\).*")) {
 			// inc first index, exc last index
 			// Check if it contains a valid boolean expression
 			int startIndex = ifBlock.indexOf('(') + 1;
 			int endIndex = ifBlock.indexOf(')');
-			if(isValidBoolExpression(ifBlock.substring(startIndex, endIndex))) {
+			if (isValidBoolExpression(ifBlock.substring(startIndex, endIndex))) {
 				// TODO Sam process rest of line after closing paren of if block
 				return true;
 			} else {
 				return false;
 			}
-			
+
 		}
 		// Check if it contains a valid statement or compound statement
 		return true;
 	}
-	
+
 	/**
 	 * Returns true if the string is a valid boolean expression
+	 * 
 	 * @param boolExp
 	 * @return true if boolExp is a valid boolean expression.
 	 */
 	public boolean isValidBoolExpression(String boolExp) {
-		// TODO Sam
+		// Author Sam
+		Matcher andOrMatcher = Pattern.compile("(\\|\\|?|\\&\\&?)").matcher(boolExp);
 		// Recurse if || or && is found
-		if(boolExp.matches(".*(\\|\\|? | \\&\\&?).*")){
+		if (andOrMatcher.find()) {
 			// Split into first half and second half
-			int endIndex = (boolExp.indexOf('|') > 0) ? boolExp.indexOf('|') : boolExp.indexOf('&');
-			String firstHalf = boolExp.substring(0, endIndex).trim();
-			String secondHalf = boolExp.substring(endIndex);
-			System.out.println(firstHalf);
-			System.out.println(secondHalf);
+			int operatorIndex = andOrMatcher.end();
+			String firstHalf = boolExp.substring(0, operatorIndex).replaceAll("(\\|\\|?|\\&\\&?)", "").trim();
+			String secondHalf = boolExp.substring(operatorIndex).trim();
 			// Recurse
+			return isValidBoolExpression(firstHalf) && isValidBoolExpression(secondHalf);
 		}
-		// Check datatypes being compared, do they match?
+		
 		// Does the string contain a valid comparator operator? { <, >, ==, !=, <=, >= }
-		if(boolExp.matches(".*(<=?|>=?|==|!=).*")) {
+		Matcher matcher = Pattern.compile("(<=?|>=?|==|!=)").matcher(boolExp);
+		if (matcher.find()) {
+			// Get index of operator
+			int operatorIndex = matcher.end();
+			
+			// Separate operands into substrings
+			String leftOperand = boolExp.substring(0, operatorIndex).replaceAll("(<=?|>=?|==|!=)", "").trim();
+			String rightOperand = boolExp.substring(operatorIndex).replaceAll("(<=?|>=?|==|!=)", "").trim();
+			
+			// Cannot compare booleans
+			if(getType(leftOperand) == DataType.BOOLEAN || getType(rightOperand) == DataType.BOOLEAN ) {
+				return false;
+			}
+			
+			// All other datatypes can be compared (int, double, char)
+			// Check if datatype is valid
+			if(getType(leftOperand) != null && getType(rightOperand) != null) {
+				return true;				
+			}
 		}
 
 		// Check if string is hard-coded { true, false }
-		if(getType(boolExp) == DataType.BOOLEAN) {
+		if (getType(boolExp) == DataType.BOOLEAN) {
 			return true;
 		}
+		
 		return false;
 	}
-	
+
 	/**
-	 * //todo Jon
-	 * Returns true if the string passed is a valid for loop
+	 * //todo Jon Returns true if the string passed is a valid for loop
+	 * 
 	 * @param forLoop
 	 * @return true if forLoop contains a valid loop
 	 */
 	public boolean isValidFor(String forLoop) {
-		// check parameters in () at start of loop, calling other methods like isValidBoolExp()
+		// check parameters in () at start of loop, calling other methods like
+		// isValidBoolExp()
 		// Check that there is a valid statement after the declaration of the for loop
 		return true;
 	}
-	
+
 	/**
 	 * Returns true if the string passed is a valid Switch Statement
+	 * 
 	 * @param switchBlock
 	 * @return True if Switch statement is valid
 	 */
@@ -133,9 +160,10 @@ public class Validator {
 		// is the syntax correct?
 		return true;
 	}
-	
+
 	/**
 	 * Returns true if the string passed is a valid While Loop
+	 * 
 	 * @param whileLoop
 	 * @return True if while loop is valid
 	 */
@@ -144,10 +172,10 @@ public class Validator {
 		// Check that statement at end of block contains a valid boolean expression
 		return true;
 	}
-	
+
 	/**
-	 * todo Jon
-	 * Returns true if the string passed is a valid simple statement
+	 * todo Jon Returns true if the string passed is a valid simple statement
+	 * 
 	 * @param simpleStatement
 	 * @return True if simple statement is valid
 	 */
@@ -159,11 +187,12 @@ public class Validator {
 		// Check for comments both // line and /* block */
 		return true;
 	}
-	
+
 	/**
 	 * Returns true if the parentheses or bracket passed to the method either:
-	 * Successfully closes a set of parentheses or brackets.
-	 * Is successfully added to the stack.
+	 * Successfully closes a set of parentheses or brackets. Is successfully added
+	 * to the stack.
+	 * 
 	 * @param paren
 	 * @return True if the parentheses is correctly placed.
 	 */
@@ -171,114 +200,128 @@ public class Validator {
 		// Check if opening or closing bracket
 		// if Opening, add to stack, return true
 		// if Closing, peek at stack to see if it matches the one at the top
-		// 		if it does match, pop and return true
-		//		if it does not match, throw an exception
+		// if it does match, pop and return true
+		// if it does not match, throw an exception
 		return true;
 	}
-	
+
 	/**
-	 * Todo: Jon
-	 * Returns true if the string passed is a valid method signature
+	 * Todo: Jon Returns true if the string passed is a valid method signature
+	 * 
 	 * @param methodSignature
 	 * @return True if the method signature is valid
 	 */
 	public boolean isValidMethodSignature(String methodSignature) {
 		// check keywords are valid and in expected order
 		// V1: Accept no parameters, void return type
-		// V2: If we have time (probably not) add passed parameters to declaredVariables map
-		// and check for a return statement that matches the return type (keep as class variable?)
+		// V2: If we have time (probably not) add passed parameters to declaredVariables
+		// map
+		// and check for a return statement that matches the return type (keep as class
+		// variable?)
 		return true;
 	}
-	
+
 	/**
 	 * Parses a string and gets the datatype of the data stored in the string
+	 * 
 	 * @param data
 	 * @return enum DataType matching the data stored in the string
 	 */
 	public DataType getType(String data) {
 		// Author Sam
 		// Check empty string (Edge case)
-		if(data.isBlank()) {
+		if (data.isBlank()) {
 			return null;
 		}
-		
-		// Check if data passed is a variable, get datatype from the declared variable map
-		if(declaredVariables.containsKey(data)) {
+
+		// Check if data passed is a variable, get datatype from the declared variable
+		// map
+		if (declaredVariables.containsKey(data)) {
 			return declaredVariables.get(data);
 		}
-		
+
 		// check int
 		try {
 			Integer.parseInt(data);
 			return DataType.INT;
-		} catch (NumberFormatException nfe) {}
+		} catch (NumberFormatException nfe) {
+		}
 
 		// check double
 		try {
 			Double.parseDouble(data);
 			return DataType.DOUBLE;
-		} catch (NumberFormatException nfe) {}
-		
+		} catch (NumberFormatException nfe) {
+		}
+
 		// check boolean
-		if(data.equals("true") || data.equals("false")) {
+		if (data.equals("true") || data.equals("false")) {
 			return DataType.BOOLEAN;
 		}
-		
+
 		// check char
-		if(data.length() == 3 && data.charAt(0) == '\'' &&  data.charAt(2) == '\'') {
+		if (data.length() == 3 && data.charAt(0) == '\'' && data.charAt(2) == '\'') {
 			return DataType.CHAR;
 		}
-		
-		// Throw an error at this point? We haven't found a matching DataType so it's invalid code?
+
+		// Throw an error at this point? We haven't found a matching DataType so it's
+		// invalid code?
 		return null;
 	}
-	
+
 	public boolean isValidated() {
 		return isValidated;
 	}
+
 	public void setValidated(boolean isValidated) {
 		this.isValidated = isValidated;
 	}
+
 	public boolean isValid() {
 		return isValid;
 	}
+
 	public void setValid(boolean isValid) {
 		this.isValid = isValid;
 	}
-	
+
 	/**
 	 * Adds a variable to the list of declared variables
+	 * 
 	 * @param variableName
 	 * @param type
 	 * @return True if successful, false if failed (Nothing was added to the map).
 	 */
 	public boolean addVariable(String variableName, DataType type) {
 		// Check if variableName is a reserved keyword
-		if(reservedKeywords.contains(variableName)) {
-			return false;
-		}
-		
-		// check if variable was declared previously
-		// .get will not return null if it has been declared previously
-		if(declaredVariables.get(variableName) != null) {
+		if (reservedKeywords.contains(variableName)) {
 			return false;
 		}
 
-		// Validate variable name (Can begin with alphanumeric or $, followed by any alphanumeric, digit, $ or _)
-		if(variableName.matches("[A-z$_]{1}[A-z0-9$_]*")) {
+		// check if variable was declared previously
+		// .get will not return null if it has been declared previously
+		if (declaredVariables.get(variableName) != null) {
+			return false;
+		}
+
+		// Validate variable name (Can begin with alphanumeric or $, followed by any
+		// alphanumeric, digit, $ or _)
+		if (variableName.matches("[A-z$_]{1}[A-z0-9$_]*")) {
 			declaredVariables.put(variableName, type);
 			return true;
 		}
-		
-		// All previous attempts to validate the variable name have failed, assume invalid
+
+		// All previous attempts to validate the variable name have failed, assume
+		// invalid
 		return false;
 	}
-	
+
 	/**
 	 * Reads in Java Reserved Keywords from file
+	 * 
 	 * @return List of reserved keywords
 	 */
-	private ArrayList<String> getReservedKeywords(){
+	private ArrayList<String> getReservedKeywords() {
 		Scanner s = null;
 		try {
 			s = new Scanner(new File("ReservedKeywords.txt"));
@@ -286,8 +329,8 @@ public class Validator {
 			e.printStackTrace();
 		}
 		reservedKeywords = new ArrayList<String>();
-		while (s.hasNext()){
-		    reservedKeywords.add(s.next());
+		while (s.hasNext()) {
+			reservedKeywords.add(s.next());
 		}
 		s.close();
 		return reservedKeywords;
