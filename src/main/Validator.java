@@ -67,7 +67,7 @@ public class Validator {
 	 * @return True if if-block is valid, false if error is encountered.
 	 */
 	public boolean isValidIf(String ifBlock) {
-		// TODO Sam
+		// Author Sam
 		// if not valid IF, throw Exception
 		// Check if it contains a valid bool
 		if (ifBlock.matches("\\s*if\\s?\\(.+\\).*")) {
@@ -96,11 +96,13 @@ public class Validator {
 	public boolean isValidBoolExpression(String boolExp) {
 		// Author Sam
 		Matcher andOrMatcher = Pattern.compile("(\\|\\|?|\\&\\&?)").matcher(boolExp);
-		// Recurse if || or && is found
+		// Recurse if ||, &&, |, & is found
 		if (andOrMatcher.find()) {
 			// Split into first half and second half
 			int operatorIndex = andOrMatcher.end();
+			// .replaceAll() on first half clears the operator that we're splitting on
 			String firstHalf = boolExp.substring(0, operatorIndex).replaceAll("(\\|\\|?|\\&\\&?)", "").trim();
+			// No .replaceAll() on the second half, which might contain additional operators
 			String secondHalf = boolExp.substring(operatorIndex).trim();
 			// Recurse
 			return isValidBoolExpression(firstHalf) && isValidBoolExpression(secondHalf);
@@ -122,7 +124,7 @@ public class Validator {
 			}
 			
 			// All other datatypes can be compared (int, double, char)
-			// Check if datatype is valid
+			// Check if data is valid
 			if(getType(leftOperand) != null && getType(rightOperand) != null) {
 				return true;				
 			}
@@ -273,17 +275,10 @@ public class Validator {
 		return isValidated;
 	}
 
-	public void setValidated(boolean isValidated) {
-		this.isValidated = isValidated;
-	}
-
 	public boolean isValid() {
 		return isValid;
 	}
 
-	public void setValid(boolean isValid) {
-		this.isValid = isValid;
-	}
 
 	/**
 	 * Adds a variable to the list of declared variables

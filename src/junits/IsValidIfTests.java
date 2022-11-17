@@ -11,10 +11,10 @@ class IsValidIfTests {
 
 	@Test
 	void testValid() {
-		assertTrue(validator.isValidIf("if(true)"));
+		assertTrue(validator.isValidIf("if(true) {i = 2;}"));
 		assertTrue(validator.isValidIf("if (true)"));
 		assertTrue(validator.isValidIf("	if(true)"));
-//		assertTrue(validator.isValidIf("if(true || false)"));
+		assertTrue(validator.isValidIf("if(true || false)"));
 		assertTrue(validator.isValidIf("if(true)	   "));
 
 	}

@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
 	AddVariableTests.class,
 	GetTypeTests.class,
-	IsValidIfTests.class
+	IsValidIfTests.class,
+	IsValidBoolExpressionTests.class
 })
 public class TestSuite{}
