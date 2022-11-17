@@ -3,6 +3,7 @@ package junits;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
+import exceptions.ParserException;
 import main.Validator;
 
 class IsValidBoolExpressionTests {
@@ -39,19 +40,24 @@ class IsValidBoolExpressionTests {
 	
 	@Test
 	void testInvalidAndOrOperators() {
-		assertFalse(validator.isValidBoolExpression("true ||"));
-		assertFalse(validator.isValidBoolExpression("true ||        fal"));
-		assertFalse(validator.isValidBoolExpression("true false || false"));		
-		
+		testInvalid("true ||","Invalid data type, data was blank.");
+		testInvalid("true ||        fal","Invalid data type: fal.");
+		testInvalid("true false || false","Invalid data type: true false.");
 	}
 
 	@Test
 	void testInvalidOperators() {
-		assertFalse(validator.isValidBoolExpression("0 => 2"));
-		assertFalse(validator.isValidBoolExpression("<=4"));
-		assertFalse(validator.isValidBoolExpression("9=     8"));		
-		assertFalse(validator.isValidBoolExpression("true!='c'"));	
-		
+		testInvalid("0 => 2","Invalid data type: 0 =.");
+		testInvalid("<=4","Invalid data type, data was blank.");
+		testInvalid("9=     8","Invalid data type: 9=     8.");		
+		testInvalid("true!='c'","Error, cannot compare booleans.");
 	}
-
+	
+	void testInvalid(String data, String expected) {
+		Exception e = assertThrows(ParserException.class, () -> {
+			validator.isValidBoolExpression(data);
+		});
+		String actual = e.getMessage();
+		assertTrue(actual.contains(expected));
+	}
 }

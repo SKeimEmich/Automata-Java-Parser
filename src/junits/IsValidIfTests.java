@@ -1,8 +1,10 @@
 package junits;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
+
+import exceptions.ParserException;
 import main.Validator;
 
 class IsValidIfTests {
@@ -18,11 +20,29 @@ class IsValidIfTests {
 		assertTrue(validator.isValidIf("if(true)	   "));
 
 	}
-//	@Test
-//	void testInvalid() {
-//		assertFalse(validator.isValidIf("iftrue)"));
-//		assertFalse(validator.isValidIf("if{true}"));
-//		assertFalse(validator.isValidIf("if(true"));
-//	}
+
+	@Test
+	void testInvalidOpeningBrace() {
+		testInvalid("iftrue)");
+	}
+
+	@Test
+	void testInvalidBraces() {
+		testInvalid("if{true})");
+	}
+	
+	@Test
+	void testInvalidClosingBrace() {
+		testInvalid("if(true");
+	}
+	
+	void testInvalid(String ifStatement) {
+		Exception e = assertThrows(ParserException.class, () -> {
+			validator.isValidIf(ifStatement);
+		});
+		String expected = String.format("Invalid if statement: \"%s\".", ifStatement);
+		String actual = e.getMessage();
+		assertTrue(actual.contains(expected));		
+	}
 
 }

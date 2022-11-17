@@ -1,15 +1,13 @@
 package junits;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-
+import exceptions.ParserException;
 import main.DataType;
 import main.Validator;
 
 class AddVariableTests {
-	
+
 	Validator validator = new Validator("NoFileProvided");
 
 	@Test
@@ -20,26 +18,54 @@ class AddVariableTests {
 		assertTrue(validator.addVariable("$123", DataType.INT));
 		assertTrue(validator.addVariable("$abc123", DataType.INT));
 	}
+
 	@Test
 	void testInvalidStartingCharacter() {
-		assertFalse(validator.addVariable("314", DataType.INT));
+		String variableName = "314";
+		DataType type = DataType.INT;
+		String expected = String.format("Unknown error adding variable (%s, %s).", variableName, type);
+		testInvalid(variableName, type, expected);
 	}
+
 	@Test
 	void testInvalidCharacter() {
-		assertFalse(validator.addVariable("pi3.14", DataType.INT));
+		String variableName = "pi3.14";
+		DataType type = DataType.INT;
+		String expected = String.format("Unknown error adding variable (%s, %s).", variableName, type);
+		testInvalid(variableName, type, expected);
 	}
+
 	@Test
 	void testInvalidKeyword() {
-		assertFalse(validator.addVariable("if", DataType.INT));
+		String variableName = "if";
+		DataType type = DataType.INT;
+		String expected = String.format("%s is a reserved keyword.", variableName);
+		testInvalid(variableName, type, expected);
 	}
+
 	@Test
 	void testInvalidBlank() {
-		assertFalse(validator.addVariable("      ", DataType.INT));
+		String variableName = "      ";
+		DataType type = DataType.INT;
+		String expected = String.format("Unknown error adding variable (%s, %s).", variableName, type);
+		testInvalid(variableName, type, expected);
 	}
+
 	@Test
 	void testInvalidAlreadyExists() {
-		validator.addVariable("alreadyDeclared", DataType.INT);
-		assertFalse(validator.addVariable("alreadyDeclared", DataType.INT));
+		String variableName = "alreadyDeclared";
+		DataType type = DataType.INT;
+		validator.addVariable(variableName, type);
+		String expected = String.format("Variable %s was declared previously.", variableName);
+		testInvalid(variableName, type, expected);
+	}
+	
+	void testInvalid(String variableName, DataType type, String expected) {
+		Exception e = assertThrows(ParserException.class, () -> {
+			validator.addVariable(variableName, type);
+		});
+		String actual = e.getMessage();
+		assertTrue(actual.contains(expected));
 	}
 
 }

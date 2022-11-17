@@ -10,6 +10,8 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import exceptions.ParserException;
+
 public class Validator {
 	private Scanner code; // Shouldn't be touched outside of this class
 	private ArrayList<String> reservedKeywords;
@@ -76,15 +78,11 @@ public class Validator {
 			int startIndex = ifBlock.indexOf('(') + 1;
 			int endIndex = ifBlock.indexOf(')');
 			if (isValidBoolExpression(ifBlock.substring(startIndex, endIndex))) {
-				// TODO Sam process rest of line after closing paren of if block
+				// TODO Sam process rest of line after closing paren of if block, throw errors where appropriate
 				return true;
-			} else {
-				return false;
 			}
-
 		}
-		// Check if it contains a valid statement or compound statement
-		return true;
+		throw new ParserException(String.format("Invalid if statement: \"%s\".", ifBlock));
 	}
 
 	/**
@@ -107,10 +105,18 @@ public class Validator {
 			// Recurse
 			return isValidBoolExpression(firstHalf) && isValidBoolExpression(secondHalf);
 		}
-		
+
+
 		// Does the string contain a valid comparator operator? { <, >, ==, !=, <=, >= }
 		Matcher matcher = Pattern.compile("(<=?|>=?|==|!=)").matcher(boolExp);
-		if (matcher.find()) {
+		if (!matcher.find()) {
+			// no operators were found
+			// Check if string is hard-coded { true, false }
+			if (getType(boolExp) == DataType.BOOLEAN) {
+				return true;
+			}
+			throw new ParserException(String.format("Could not find a valid operator in the expression \"%s\".", boolExp));
+		} else { // operators were found in boolExp, continue
 			// Get index of operator
 			int operatorIndex = matcher.end();
 			
@@ -120,22 +126,12 @@ public class Validator {
 			
 			// Cannot compare booleans
 			if(getType(leftOperand) == DataType.BOOLEAN || getType(rightOperand) == DataType.BOOLEAN ) {
-				return false;
+				throw new ParserException("Error, cannot compare booleans.");
 			}
-			
-			// All other datatypes can be compared (int, double, char)
-			// Check if data is valid
-			if(getType(leftOperand) != null && getType(rightOperand) != null) {
-				return true;				
-			}
-		}
 
-		// Check if string is hard-coded { true, false }
-		if (getType(boolExp) == DataType.BOOLEAN) {
+			// All other datatypes can be compared (int, double, char)
 			return true;
 		}
-		
-		return false;
 	}
 
 	/**
@@ -233,7 +229,7 @@ public class Validator {
 		// Author Sam
 		// Check empty string (Edge case)
 		if (data.isBlank()) {
-			return null;
+			throw new ParserException(String.format("Invalid data type, data was blank.", data));
 		}
 
 		// Check if data passed is a variable, get datatype from the declared variable
@@ -266,9 +262,7 @@ public class Validator {
 			return DataType.CHAR;
 		}
 
-		// Throw an error at this point? We haven't found a matching DataType so it's
-		// invalid code?
-		return null;
+		throw new ParserException(String.format("Invalid data type: %s.", data));
 	}
 
 	public boolean isValidated() {
@@ -290,13 +284,13 @@ public class Validator {
 	public boolean addVariable(String variableName, DataType type) {
 		// Check if variableName is a reserved keyword
 		if (reservedKeywords.contains(variableName)) {
-			return false;
+			throw new ParserException(String.format("%s is a reserved keyword.", variableName));
 		}
 
 		// check if variable was declared previously
 		// .get will not return null if it has been declared previously
 		if (declaredVariables.get(variableName) != null) {
-			return false;
+			throw new ParserException(String.format("Variable %s was declared previously.", variableName));
 		}
 
 		// Validate variable name (Can begin with alphanumeric or $, followed by any
@@ -308,7 +302,7 @@ public class Validator {
 
 		// All previous attempts to validate the variable name have failed, assume
 		// invalid
-		return false;
+		throw new ParserException(String.format("Unknown error adding variable (%s, %s).", variableName, type));
 	}
 
 	/**

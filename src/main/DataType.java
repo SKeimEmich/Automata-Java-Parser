@@ -5,8 +5,14 @@ public enum DataType{
 //	SHORT,
 //	LONG,
 //	FLOAT, // Removed for main project, added as stretch goal
-	INT,
-	DOUBLE,
-	BOOLEAN,
-	CHAR
+	INT("int"),
+	DOUBLE("double"),
+	BOOLEAN("boolean"),
+	CHAR("char");
+	
+	public final String name;
+	
+	private DataType(String name) {
+		this.name = name;
+	}
 }
