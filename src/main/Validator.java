@@ -65,7 +65,19 @@ public class Validator {
 		// TODO Sam
 		// if not valid IF, throw Exception
 		// Check if it contains a valid bool
-		// inc first index, exc last index
+		if(ifBlock.matches("\\s*if\\s?\\(.+\\).*")) {
+			// inc first index, exc last index
+			// Check if it contains a valid boolean expression
+			int startIndex = ifBlock.indexOf('(') + 1;
+			int endIndex = ifBlock.indexOf(')');
+			if(isValidBoolExpression(ifBlock.substring(startIndex, endIndex))) {
+				// TODO Sam process rest of line after closing paren of if block
+				return true;
+			} else {
+				return false;
+			}
+			
+		}
 		// Check if it contains a valid statement or compound statement
 		return true;
 	}
@@ -78,10 +90,25 @@ public class Validator {
 	public boolean isValidBoolExpression(String boolExp) {
 		// TODO Sam
 		// Recurse if || or && is found
+		if(boolExp.matches(".*(\\|\\|? | \\&\\&?).*")){
+			// Split into first half and second half
+			int endIndex = (boolExp.indexOf('|') > 0) ? boolExp.indexOf('|') : boolExp.indexOf('&');
+			String firstHalf = boolExp.substring(0, endIndex).trim();
+			String secondHalf = boolExp.substring(endIndex);
+			System.out.println(firstHalf);
+			System.out.println(secondHalf);
+			// Recurse
+		}
 		// Check datatypes being compared, do they match?
 		// Does the string contain a valid comparator operator? { <, >, ==, !=, <=, >= }
+		if(boolExp.matches(".*(<=?|>=?|==|!=).*")) {
+		}
+
 		// Check if string is hard-coded { true, false }
-		return true;
+		if(getType(boolExp) == DataType.BOOLEAN) {
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -169,7 +196,7 @@ public class Validator {
 	 * @return enum DataType matching the data stored in the string
 	 */
 	public DataType getType(String data) {
-		// TODO Sam
+		// Author Sam
 		// Check empty string (Edge case)
 		if(data.isBlank()) {
 			return null;
@@ -196,8 +223,6 @@ public class Validator {
 		if(data.equals("true") || data.equals("false")) {
 			return DataType.BOOLEAN;
 		}
-		// check if it's a boolean expression
-		//TODO Sam
 		
 		// check char
 		if(data.length() == 3 && data.charAt(0) == '\'' &&  data.charAt(2) == '\'') {
