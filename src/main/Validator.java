@@ -20,6 +20,7 @@ public class Validator {
 	private boolean isValid;
 	private Stack<Character> parens;
 
+	// Constructor
 	public Validator(String filename) {
 		// TODO Fix this so it reads file as scanner object
 		code = null;
@@ -33,6 +34,38 @@ public class Validator {
 		isValid = false; // Assume invalid
 	}
 
+	// Setup Methods for the constructor to use
+	/**
+	 * Reads in Java Reserved Keywords from file
+	 * 
+	 * @return List of reserved keywords
+	 */
+	private ArrayList<String> getReservedKeywords() {
+		Scanner s = null;
+		try {
+			s = new Scanner(new File("ReservedKeywords.txt"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		reservedKeywords = new ArrayList<String>();
+		while (s.hasNext()) {
+			reservedKeywords.add(s.next());
+		}
+		s.close();
+		return reservedKeywords;
+	}
+	
+	// Variable access methods
+	public boolean isValidated() {
+		return isValidated;
+	}
+
+	public boolean isValid() {
+		return isValid;
+	}
+	
+	// Main Method to be run
+	
 	/**
 	 * Tests if the file scanned by Scanner object contains valid Java code.
 	 * 
@@ -61,6 +94,52 @@ public class Validator {
 		return;
 	}
 
+	// Methods used to parse lines and blocks, alphabetical by Author last name
+	
+	/**
+	 * //todo Jon Returns true if the string passed is a valid for loop
+	 * 
+	 * @param forLoop
+	 * @return true if forLoop contains a valid loop
+	 */
+	public boolean isValidFor(String forLoop) {
+		// check parameters in () at start of loop, calling other methods like
+		// isValidBoolExp()
+		// Check that there is a valid statement after the declaration of the for loop
+		return true;
+	}
+
+	/**
+	 * todo Jon Returns true if the string passed is a valid simple statement
+	 * 
+	 * @param simpleStatement
+	 * @return True if simple statement is valid
+	 */
+	public boolean isValidSimpleStatement(String simpleStatement) {
+		// Check if it is an assignment statement
+		// check if it is a Sysout
+		// Check for in-line operators { ++, -- }
+		// Check for System.out.println();
+		// Check for comments both // line and /* block */
+		return true;
+	}
+
+	/**
+	 * Todo: Jon Returns true if the string passed is a valid method signature
+	 * 
+	 * @param methodSignature
+	 * @return True if the method signature is valid
+	 */
+	public boolean isValidMethodSignature(String methodSignature) {
+		// check keywords are valid and in expected order
+		// V1: Accept no parameters, void return type
+		// V2: If we have time (probably not) add passed parameters to declaredVariables
+		// map
+		// and check for a return statement that matches the return type (keep as class
+		// variable?)
+		return true;
+	}
+	
 	/**
 	 * Tests if the string passed is a valid if statement and it contains a valid
 	 * statement or code block.
@@ -135,91 +214,6 @@ public class Validator {
 	}
 
 	/**
-	 * //todo Jon Returns true if the string passed is a valid for loop
-	 * 
-	 * @param forLoop
-	 * @return true if forLoop contains a valid loop
-	 */
-	public boolean isValidFor(String forLoop) {
-		// check parameters in () at start of loop, calling other methods like
-		// isValidBoolExp()
-		// Check that there is a valid statement after the declaration of the for loop
-		return true;
-	}
-
-	/**
-	 * Returns true if the string passed is a valid Switch Statement
-	 * 
-	 * @param switchBlock
-	 * @return True if Switch statement is valid
-	 */
-	public boolean isValidSwitch(String switchBlock) {
-		// Check types in block, do they all match?
-		// is the syntax correct?
-		return true;
-	}
-
-	/**
-	 * Returns true if the string passed is a valid While Loop
-	 * 
-	 * @param whileLoop
-	 * @return True if while loop is valid
-	 */
-	public boolean isValidWhile(String whileLoop) {
-		// Check that block is a valid block
-		// Check that statement at end of block contains a valid boolean expression
-		return true;
-	}
-
-	/**
-	 * todo Jon Returns true if the string passed is a valid simple statement
-	 * 
-	 * @param simpleStatement
-	 * @return True if simple statement is valid
-	 */
-	public boolean isValidSimpleStatement(String simpleStatement) {
-		// Check if it is an assignment statement
-		// check if it is a Sysout
-		// Check for in-line operators { ++, -- }
-		// Check for System.out.println();
-		// Check for comments both // line and /* block */
-		return true;
-	}
-
-	/**
-	 * Returns true if the parentheses or bracket passed to the method either:
-	 * Successfully closes a set of parentheses or brackets. Is successfully added
-	 * to the stack.
-	 * 
-	 * @param paren
-	 * @return True if the parentheses is correctly placed.
-	 */
-	public boolean isValidParens(char paren) {
-		// Check if opening or closing bracket
-		// if Opening, add to stack, return true
-		// if Closing, peek at stack to see if it matches the one at the top
-		// if it does match, pop and return true
-		// if it does not match, throw an exception
-		return true;
-	}
-
-	/**
-	 * Todo: Jon Returns true if the string passed is a valid method signature
-	 * 
-	 * @param methodSignature
-	 * @return True if the method signature is valid
-	 */
-	public boolean isValidMethodSignature(String methodSignature) {
-		// check keywords are valid and in expected order
-		// V1: Accept no parameters, void return type
-		// V2: If we have time (probably not) add passed parameters to declaredVariables
-		// map
-		// and check for a return statement that matches the return type (keep as class
-		// variable?)
-		return true;
-	}
-
-	/**
 	 * Parses a string and gets the datatype of the data stored in the string
 	 * 
 	 * @param data
@@ -265,15 +259,6 @@ public class Validator {
 		throw new ParserException(String.format("Invalid data type: %s.", data));
 	}
 
-	public boolean isValidated() {
-		return isValidated;
-	}
-
-	public boolean isValid() {
-		return isValid;
-	}
-
-
 	/**
 	 * Adds a variable to the list of declared variables
 	 * 
@@ -282,6 +267,7 @@ public class Validator {
 	 * @return True if successful, false if failed (Nothing was added to the map).
 	 */
 	public boolean addVariable(String variableName, DataType type) {
+		// Author Sam
 		// Check if variableName is a reserved keyword
 		if (reservedKeywords.contains(variableName)) {
 			throw new ParserException(String.format("%s is a reserved keyword.", variableName));
@@ -306,22 +292,44 @@ public class Validator {
 	}
 
 	/**
-	 * Reads in Java Reserved Keywords from file
+	 * Returns true if the string passed is a valid Switch Statement
 	 * 
-	 * @return List of reserved keywords
+	 * @param switchBlock
+	 * @return True if Switch statement is valid
 	 */
-	private ArrayList<String> getReservedKeywords() {
-		Scanner s = null;
-		try {
-			s = new Scanner(new File("ReservedKeywords.txt"));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		reservedKeywords = new ArrayList<String>();
-		while (s.hasNext()) {
-			reservedKeywords.add(s.next());
-		}
-		s.close();
-		return reservedKeywords;
+	public boolean isValidSwitch(String switchBlock) {
+		// Check types in block, do they all match?
+		// is the syntax correct?
+		return true;
 	}
+
+	/**
+	 * Returns true if the string passed is a valid While Loop
+	 * 
+	 * @param whileLoop
+	 * @return True if while loop is valid
+	 */
+	public boolean isValidWhile(String whileLoop) {
+		// Check that block is a valid block
+		// Check that statement at end of block contains a valid boolean expression
+		return true;
+	}
+
+	/**
+	 * Returns true if the parentheses or bracket passed to the method either:
+	 * Successfully closes a set of parentheses or brackets. Is successfully added
+	 * to the stack.
+	 * 
+	 * @param paren
+	 * @return True if the parentheses is correctly placed.
+	 */
+	public boolean isValidParens(char paren) {
+		// Check if opening or closing bracket
+		// if Opening, add to stack, return true
+		// if Closing, peek at stack to see if it matches the one at the top
+		// if it does match, pop and return true
+		// if it does not match, throw an exception
+		return true;
+	}
+
 }
