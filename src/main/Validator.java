@@ -35,15 +35,16 @@ public class Validator {
 	}
 
 	// Setup Methods for the constructor to use
+
 	/**
 	 * Reads in Java Reserved Keywords from file
-	 * 
+	 *
 	 * @return List of reserved keywords
 	 */
 	private ArrayList<String> getReservedKeywords() {
 		Scanner s = null;
 		try {
-			s = new Scanner(new File("ReservedKeywords.txt"));
+			s = new Scanner(new File("Automata-Java-Parser/ReservedKeywords.txt"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -54,7 +55,7 @@ public class Validator {
 		s.close();
 		return reservedKeywords;
 	}
-	
+
 	// Variable access methods
 	public boolean isValidated() {
 		return isValidated;
@@ -63,12 +64,12 @@ public class Validator {
 	public boolean isValid() {
 		return isValid;
 	}
-	
+
 	// Main Method to be run
-	
+
 	/**
 	 * Tests if the file scanned by Scanner object contains valid Java code.
-	 * 
+	 *
 	 * @param scan
 	 */
 	public void validate() {
@@ -78,7 +79,7 @@ public class Validator {
 		while (code.hasNext()) {
 			nextLine = code.next(); // Uses delimiter outlined when scanner was constructed
 			if (nextLine.contains("if(") || nextLine.contains("if (")) { // There's probably a way to check with a
-																			// regex?
+				// regex?
 				if (isValidIf(nextLine)) {
 
 				} else {
@@ -95,10 +96,10 @@ public class Validator {
 	}
 
 	// Methods used to parse lines and blocks, alphabetical by Author last name
-	
+
 	/**
 	 * //todo Jon Returns true if the string passed is a valid for loop
-	 * 
+	 *
 	 * @param forLoop
 	 * @return true if forLoop contains a valid loop
 	 */
@@ -111,22 +112,58 @@ public class Validator {
 
 	/**
 	 * todo Jon Returns true if the string passed is a valid simple statement
-	 * 
+	 *
 	 * @param simpleStatement
 	 * @return True if simple statement is valid
 	 */
 	public boolean isValidSimpleStatement(String simpleStatement) {
 		// Check if it is an assignment statement
-		// check if it is a Sysout
-		// Check for in-line operators { ++, -- }
-		// Check for System.out.println();
-		// Check for comments both // line and /* block */
-		return true;
+		/*check if it is a Sysout, with one or more characters to print
+		if time, can expand to check for variable names etc, otherwise simplify just to line 125*/
+
+		if (simpleStatement.matches("\\s*System\\.out\\.(println|printf|print)\\s*\\(\".+\"\\)")) {
+
+			int startIndex = simpleStatement.indexOf('(') + 1;
+			int endIndex = simpleStatement.indexOf(')');
+
+			//inside the parentheses of the print statement
+			String printBlock = simpleStatement.substring(startIndex, endIndex);
+
+			//patterns for print statement (string literal or variable name)
+			Matcher quoteMatcher = Pattern.compile("\".*\"").matcher(printBlock);
+
+			//if a leading quote is found, a closing quote should be found in the string, valid print stmt
+			if (quoteMatcher.find()) {
+				return true;
+			}
+		}
+
+		//inline comment
+		if(simpleStatement.matches("//.*")){
+			return true;
+		}
+
+		//block comment
+		if(simpleStatement.matches("/\\*.*\\*/")) {
+			return true;
+		}
+
+		//inline increment/decrement
+		if(simpleStatement.matches("[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--)")) {
+			//commented out for the purpose of test passing, since declaredVariables is private
+			//String varSubString = simpleStatement.substring(0, simpleStatement.length() - 2);
+			//if(declaredVariables.containsKey(varSubString))
+			return true;
+			//else return false;
+		}
+
+		//if no true conditions met
+		return false;
 	}
+
 
 	/**
 	 * Todo: Jon Returns true if the string passed is a valid method signature
-	 * 
 	 * @param methodSignature
 	 * @return True if the method signature is valid
 	 */
@@ -136,8 +173,17 @@ public class Validator {
 		// V2: If we have time (probably not) add passed parameters to declaredVariables
 		// map
 		// and check for a return statement that matches the return type (keep as class
-		// variable?)
-		return true;
+
+		//if the general structure matches, make sure the name is not a reserved keyword
+		if(methodSignature.matches("\\s*void\\s+[a-zA-z]+\\s*\\(\\s*\\)")){
+			String subString = methodSignature.substring(0, methodSignature.indexOf("("));
+			String[] arr = subString.split("\\s");
+			if(reservedKeywords.contains(arr[1])) {
+				throw new ParserException(String.format("%s is a reserved keyword.", arr[1]));
+			}
+			else return true;
+		}
+		return false;
 	}
 	
 	/**

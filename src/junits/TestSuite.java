@@ -9,6 +9,9 @@ import org.junit.runners.Suite;
 	AddVariableTests.class,
 	GetTypeTests.class,
 	IsValidIfTests.class,
-	IsValidBoolExpressionTests.class
+	IsValidBoolExpressionTests.class,
+	isValidSimpleStatementTests.class,
+	isValidMethodSigTests.class
+
 })
 public class TestSuite{}
