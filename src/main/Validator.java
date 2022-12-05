@@ -25,8 +25,9 @@ public class Validator {
 		// TODO Fix this so it reads file as scanner object
 		code = null;
 
-//		scan.useDelimiter(";"); // TODO This delimiter may need to be changed
-//		Should it be \n? How do we evaluate a file with no line breaks, could we recurse when we hit a ;?
+		// scan.useDelimiter(";"); // TODO This delimiter may need to be changed
+		// Should it be \n? How do we evaluate a file with no line breaks, could we
+		// recurse when we hit a ;?
 
 		getReservedKeywords();
 		declaredVariables = new HashMap<>();
@@ -54,7 +55,7 @@ public class Validator {
 		s.close();
 		return reservedKeywords;
 	}
-	
+
 	// Variable access methods
 	public boolean isValidated() {
 		return isValidated;
@@ -63,9 +64,9 @@ public class Validator {
 	public boolean isValid() {
 		return isValid;
 	}
-	
+
 	// Main Method to be run
-	
+
 	/**
 	 * Tests if the file scanned by Scanner object contains valid Java code.
 	 * 
@@ -95,7 +96,7 @@ public class Validator {
 	}
 
 	// Methods used to parse lines and blocks, alphabetical by Author last name
-	
+
 	/**
 	 * //todo Jon Returns true if the string passed is a valid for loop
 	 * 
@@ -139,7 +140,7 @@ public class Validator {
 		// variable?)
 		return true;
 	}
-	
+
 	/**
 	 * Tests if the string passed is a valid if statement and it contains a valid
 	 * statement or code block.
@@ -157,7 +158,8 @@ public class Validator {
 			int startIndex = ifBlock.indexOf('(') + 1;
 			int endIndex = ifBlock.indexOf(')');
 			if (isValidBoolExpression(ifBlock.substring(startIndex, endIndex))) {
-				// TODO Sam process rest of line after closing paren of if block, throw errors where appropriate
+				// TODO Sam process rest of line after closing paren of if block, throw errors
+				// where appropriate
 				return true;
 			}
 		}
@@ -185,7 +187,6 @@ public class Validator {
 			return isValidBoolExpression(firstHalf) && isValidBoolExpression(secondHalf);
 		}
 
-
 		// Does the string contain a valid comparator operator? { <, >, ==, !=, <=, >= }
 		Matcher matcher = Pattern.compile("(<=?|>=?|==|!=)").matcher(boolExp);
 		if (!matcher.find()) {
@@ -194,17 +195,18 @@ public class Validator {
 			if (getType(boolExp) == DataType.BOOLEAN) {
 				return true;
 			}
-			throw new ParserException(String.format("Could not find a valid operator in the expression \"%s\".", boolExp));
+			throw new ParserException(
+					String.format("Could not find a valid operator in the expression \"%s\".", boolExp));
 		} else { // operators were found in boolExp, continue
 			// Get index of operator
 			int operatorIndex = matcher.end();
-			
+
 			// Separate operands into substrings
 			String leftOperand = boolExp.substring(0, operatorIndex).replaceAll("(<=?|>=?|==|!=)", "").trim();
 			String rightOperand = boolExp.substring(operatorIndex).replaceAll("(<=?|>=?|==|!=)", "").trim();
-			
+
 			// Cannot compare booleans
-			if(getType(leftOperand) == DataType.BOOLEAN || getType(rightOperand) == DataType.BOOLEAN ) {
+			if (getType(leftOperand) == DataType.BOOLEAN || getType(rightOperand) == DataType.BOOLEAN) {
 				throw new ParserException("Error, cannot compare booleans.");
 			}
 
@@ -293,7 +295,7 @@ public class Validator {
 
 	/**
 	 * Returns true if the string passed is a valid Switch Statement
-	 * 
+	 * TODO Katie
 	 * @param switchBlock
 	 * @return True if Switch statement is valid
 	 */
@@ -305,7 +307,7 @@ public class Validator {
 
 	/**
 	 * Returns true if the string passed is a valid While Loop
-	 * 
+	 * TODO Katie
 	 * @param whileLoop
 	 * @return True if while loop is valid
 	 */
@@ -319,16 +321,29 @@ public class Validator {
 	 * Returns true if the parentheses or bracket passed to the method either:
 	 * Successfully closes a set of parentheses or brackets. Is successfully added
 	 * to the stack.
-	 * 
+	 * TODO Katie
 	 * @param paren
 	 * @return True if the parentheses is correctly placed.
 	 */
 	public boolean isValidParens(char paren) {
 		// Check if opening or closing bracket
 		// if Opening, add to stack, return true
+		if (paren == '(') {
+			parens.add(paren);
+			return true;
+		}
 		// if Closing, peek at stack to see if it matches the one at the top
-		// if it does match, pop and return true
-		// if it does not match, throw an exception
+		if (paren == ')') {
+			// if it does match, pop and return true
+			if (parens.peek() == '(') {
+				parens.pop();
+				return true;
+			}
+			// if it does not match, throw an exception
+			else {
+				throw new ParserException(String.format("Parentheses do not match (%s).", parens));
+			}
+		}
 		return true;
 	}
 

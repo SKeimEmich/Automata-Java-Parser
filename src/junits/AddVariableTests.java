@@ -59,7 +59,7 @@ class AddVariableTests {
 		String expected = String.format("Variable %s was declared previously.", variableName);
 		testInvalid(variableName, type, expected);
 	}
-	
+
 	void testInvalid(String variableName, DataType type, String expected) {
 		Exception e = assertThrows(ParserException.class, () -> {
 			validator.addVariable(variableName, type);

@@ -6,9 +6,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 
 @Suite.SuiteClasses({
-	AddVariableTests.class,
-	GetTypeTests.class,
-	IsValidIfTests.class,
-	IsValidBoolExpressionTests.class
+		AddVariableTests.class,
+		GetTypeTests.class,
+		IsValidIfTests.class,
+		IsValidBoolExpressionTests.class
 })
-public class TestSuite{}
+public class TestSuite {
+}
