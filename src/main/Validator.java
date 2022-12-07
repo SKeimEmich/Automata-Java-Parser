@@ -312,17 +312,15 @@ public class Validator {
 	 * @return True if the method signature is valid
 	 */
 	public boolean isValidMethodSignature(String methodSignature) {
-		// check keywords are valid and in expected order
-		// V1: Accept no parameters, void return type
-		// V2: If we have time (probably not) add passed parameters to declaredVariables
-		// map
-		// and check for a return statement that matches the return type (keep as class
 
-		//if the general structure matches, make sure the name is not a reserved keyword
-
+		//basic structure for method signature
 		if(methodSignature.matches("\\s*public\\s*static\\s*void\\s+[a-zA-z]+\\s*\\(\\s*\\)")){
+
+			//get substring up to opening parentheses of method declaration, split it into tokens
 			String subString = methodSignature.substring(0, methodSignature.indexOf("("));
 			String[] arr = subString.split("\\s");
+
+			//arr[3] should be the method name, if it is a reserved keyword throw exception
 			if(reservedKeywords.contains(arr[3])) {
 				throw new ParserException(String.format("%s is a reserved keyword.", arr[1]));
 			}

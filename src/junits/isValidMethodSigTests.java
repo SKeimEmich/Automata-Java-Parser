@@ -41,6 +41,4 @@ class isValidMethodSigTests {
         assertThrows(ParserException.class, () -> validator.isValidMethodSignature("public static void enum()"));
     }
 
-
-
 }
