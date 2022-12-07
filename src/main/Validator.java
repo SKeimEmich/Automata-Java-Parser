@@ -56,7 +56,7 @@ public class Validator {
 		s.close();
 		return reservedKeywords;
 	}
-	
+
 	// Variable access methods
 	public boolean isValidated() {
 		return isValidated;
@@ -65,9 +65,9 @@ public class Validator {
 	public boolean isValid() {
 		return isValid;
 	}
-	
+
 	// Main Method to be run
-	
+
 	/**
 	 * Tests if the file scanned by Scanner object contains valid Java code.
 	 * 
@@ -97,7 +97,7 @@ public class Validator {
 	}
 
 	// Methods used to parse lines and blocks, alphabetical by Author last name
-	
+
 	/**
 	 * //todo Jon Returns true if the string passed is a valid for loop
 	 * 
@@ -141,7 +141,7 @@ public class Validator {
 		// variable?)
 		return true;
 	}
-	
+
 	/**
 	 * Tests if the string passed is a valid if statement and it contains a valid
 	 * statement or code block.
@@ -151,63 +151,49 @@ public class Validator {
 	 */
 	public boolean isValidIf(String ifBlock) {
 		// Author Sam
-		// if not valid IF, throw Exception
-		// Check if it contains a valid bool
-		if (ifBlock.matches("\\s*if\\s?\\(.+\\).*")) {
-			// inc first index, exc last index
-			// Check if it contains a valid boolean expression
-			int startIndex = ifBlock.indexOf('(') + 1;
-			int endIndex = ifBlock.indexOf(')');
-			if (!isValidBoolExpression(ifBlock.substring(startIndex, endIndex))) {
-				throw new ParserException("I don't know how you got here, so congratulations on that.");
-			}
-			
-			// remove if() from ifBlock
-			String remainingIf = ifBlock.substring(endIndex + 1).trim();
-			System.out.println(remainingIf);
-			// If there's nothing after the if statement, it's invalid
-			if(remainingIf.length() == 0) {
-				throw new ParserException(String.format("Invalid if statement %s, expected statement at end.", ifBlock));
-			}
-			
-			// Get block of code if it exists
-			if(remainingIf.charAt(0) == '{') {
-				int indexOfClosingBrace = getPositionOfClosingBrace(remainingIf);
-				if(indexOfClosingBrace > 0) {
-					// TODO send code block to processor
-					String codeBlock = remainingIf.substring(0, indexOfClosingBrace);
-					System.out.println(codeBlock);
-//					isValidCodeBlock("");
-				}
-			} else {
-			// Get next line of code
-			}
-			
-			
-			while(remainingIf.contains("else if")) {
-				// Process chained else if's
-				
-				// Chop off else if's
-				// check if remaining code is code block or simple statement
-				// process remaining code
-			}
-			// Check if there's an else at the end of the statement
-			if(remainingIf.contains("else")) {
-				// Remove else keyword
-				// check if remaining code is code block or simple statement
-				// process remaining code
-			}
-			
-			return true;
+		
+		// Check if the IF statement does not match the pattern "if() "
+		if (!ifBlock.matches("\\A\\s*if\\s?\\(.+\\).*")) {
+			throw new ParserException(String.format("Invalid if statement: \"%s\".", ifBlock));
 		}
-		throw new ParserException(String.format("Invalid if statement: \"%s\".", ifBlock));
+
+		// It does match the pattern for IF(), proceed
+		
+		// inc first index, exc last index
+		// Check if it contains a valid boolean expression
+		int startIndex = ifBlock.indexOf('(') + 1;
+		int endIndex = ifBlock.indexOf(')');
+		if (!isValidBoolExpression(ifBlock.substring(startIndex, endIndex))) {
+			throw new ParserException("I don't know how you got here, so congratulations on that.");
+		}
+
+		// remove if() from ifBlock
+		String remainingIf = ifBlock.substring(endIndex + 1).trim();
+		// If there's nothing after the if statement, it's invalid
+		if (remainingIf.length() == 0) {
+			throw new ParserException(String.format("Invalid if statement %s, expected statement at end.", ifBlock));
+		}
+
+		// Get block of code if it exists
+		if (remainingIf.charAt(0) == '{') {
+			int indexOfClosingBrace = getPositionOfClosingBrace(remainingIf);
+			if (indexOfClosingBrace > 0) {
+				String codeBlock = remainingIf.substring(0, indexOfClosingBrace + 1);
+				isValidCodeBlock(codeBlock); // This method will throw an error if it is invalid
+			}
+		} else {
+			// Remaining code in block is assumed to be a simple statement
+			isValidSimpleStatement(remainingIf); // This method will throw an error if it is invalid				
+		}
+		return true;
 	}
-	
+
 	/**
 	 * Returns the index of the closing brace.
+	 * 
 	 * @param code that begins with an opening brace
-	 * @return index of closing brace that matches first brace,
-	 * or -1 if code does not begin with an opening brace
+	 * @return index of closing brace that matches first brace, or -1 if code does
+	 *         not begin with an opening brace
 	 */
 	public int getPositionOfClosingBrace(String code) {
 		// Author Sam
@@ -215,7 +201,7 @@ public class Validator {
 		code = code.trim();
 		// the code passed should start with an opening brace ( {, (, or [ )
 		String openingBrace = Character.toString(code.charAt(0));
-		if(!openingBrace.matches("(\\{|\\(|\\[)")) { // Confirm that code begins with opening brace
+		if (!openingBrace.matches("(\\{|\\(|\\[)")) { // Confirm that code begins with opening brace
 			return -1;
 		}
 		// Find the index of the brace that closes this block
@@ -226,24 +212,24 @@ public class Validator {
 		// Push starting brace to stack
 		stack.push(openingBrace.charAt(0));
 		// while stack is not empty
-		while(!stack.isEmpty()) {
+		while (!stack.isEmpty()) {
 			index++;
-			// if we've reached the end of the string and the stack is not empty, throw an error
-			if(index == code.length()) {
-				throw new ParserException(String.format("Braces do not match within code block, %s is not closed.%n%s", stack.peek(), code));
+			// if we've reached the end of the string and the stack is not empty, throw an
+			// error
+			if (index == code.length()) {
+				throw new ParserException(String.format("Braces do not match within code block, %s is not closed.%n%s",
+						stack.peek(), code));
 			}
 			// iterate over string
 			character = code.charAt(index);
 			// push opening braces to stack
-			if(character == '{' || character == '(' || character == '[') {
+			if (character == '{' || character == '(' || character == '[') {
 				stack.push(character);
 			}
 			// when closing brace is encountered, pop from stack
 			char stackMatch = stack.peek();
-			if((stackMatch == '{' && character == '}')
-					|| (stackMatch == '(' && character == ')')
-					|| (stackMatch == '[' && character == ']')
-					) {
+			if ((stackMatch == '{' && character == '}') || (stackMatch == '(' && character == ')')
+					|| (stackMatch == '[' && character == ']')) {
 				stack.pop();
 			}
 		}
@@ -272,7 +258,6 @@ public class Validator {
 			return isValidBoolExpression(firstHalf) && isValidBoolExpression(secondHalf);
 		}
 
-
 		// Does the string contain a valid comparator operator? { <, >, ==, !=, <=, >= }
 		Matcher matcher = Pattern.compile("(<=?|>=?|==|!=)").matcher(boolExp);
 		if (!matcher.find()) {
@@ -281,17 +266,18 @@ public class Validator {
 			if (getType(boolExp) == DataType.BOOLEAN) {
 				return true;
 			}
-			throw new ParserException(String.format("Could not find a valid operator in the expression \"%s\".", boolExp));
+			throw new ParserException(
+					String.format("Could not find a valid operator in the expression \"%s\".", boolExp));
 		} else { // operators were found in boolExp, continue
 			// Get index of operator
 			int operatorIndex = matcher.end();
-			
+
 			// Separate operands into substrings
 			String leftOperand = boolExp.substring(0, operatorIndex).replaceAll("(<=?|>=?|==|!=)", "").trim();
 			String rightOperand = boolExp.substring(operatorIndex).replaceAll("(<=?|>=?|==|!=)", "").trim();
-			
+
 			// Cannot compare booleans
-			if(getType(leftOperand) == DataType.BOOLEAN || getType(rightOperand) == DataType.BOOLEAN ) {
+			if (getType(leftOperand) == DataType.BOOLEAN || getType(rightOperand) == DataType.BOOLEAN) {
 				throw new ParserException("Error, cannot compare booleans.");
 			}
 
@@ -415,7 +401,7 @@ public class Validator {
 		// loop until end is reached, must end with }
 		return true;
 	}
-	
+
 	/**
 	 * 
 	 */
