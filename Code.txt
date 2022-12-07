@@ -1,0 +1,5 @@
+public static void main(){
+int i;
+i = 2;
+boolean y = i > 3;
+}

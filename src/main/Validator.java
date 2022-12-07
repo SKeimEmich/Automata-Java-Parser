@@ -1,7 +1,10 @@
 package main;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -15,7 +18,7 @@ import java.util.regex.Pattern;
 import exceptions.ParserException;
 
 public class Validator {
-	private Scanner code; // Shouldn't be touched outside of this class
+	private String code; // Shouldn't be touched outside of this class
 	private ArrayList<String> reservedKeywords;
 	private Map<String, DataType> declaredVariables;
 	private boolean isValidated;
@@ -23,12 +26,26 @@ public class Validator {
 	private Stack<Character> parens;
 
 	// Constructor
-	public Validator(String filename) {
-		// TODO Fix this so it reads file as scanner object
-		code = null;
-
-//		scan.useDelimiter(";"); // TODO This delimiter may need to be changed
-//		Should it be \n? How do we evaluate a file with no line breaks, could we recurse when we hit a ;?
+	public Validator(String fileName) {
+		// Construct a scanner object to read from file
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(fileName));
+			StringBuilder sb = new StringBuilder();
+			String line = null;
+			String separator = "\n";
+			while((line = reader.readLine()) != null) {
+				sb.append(line);
+				sb.append(separator);
+			}
+			// remove last line separator
+			sb.deleteCharAt(sb.length() - 1);
+			reader.close();
+			code = sb.toString();
+		} catch (FileNotFoundException fnfe) {
+			System.err.printf("File %s not found, please try again.", fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		getReservedKeywords();
 		declaredVariables = new HashMap<>();
@@ -75,25 +92,36 @@ public class Validator {
 	 */
 	public void validate() {
 		// check if the code has been scanned already, escape to prevent duplicate scans
-
-		String nextLine;
-		while (code.hasNext()) {
-			nextLine = code.next(); // Uses delimiter outlined when scanner was constructed
-			if (nextLine.contains("if(") || nextLine.contains("if (")) { // There's probably a way to check with a
-																			// regex?
-				if (isValidIf(nextLine)) {
-
-				} else {
-					return; // Not valid, exit method
-				}
-			}
+		if(isValidated) {
+			return;
 		}
-
+		
+		// get indices of code block braces
+		int indexOfOpeningBrace = code.indexOf("{");
+		int indexOfClosingBrace = getPositionOfClosingBrace(code.substring(indexOfOpeningBrace));		
+		
+		// if there is text after the closing brace, throw an error
+		if(code.substring(indexOfClosingBrace).isBlank()) {
+			throw new ParserException("Cannot have code outside of method code block.");
+		}
+		
+		// if there is no opening brace, throw an error
+		if(indexOfOpeningBrace == -1) {
+			throw new ParserException("No code block exists.");
+		}
+		
+		// Validate method signature
+		String methodSignature = code.substring(0, indexOfOpeningBrace);
+		isValidMethodSignature(methodSignature);
+		
+		// get code block (block belonging to method)
+		String codeBlock = code.substring(indexOfOpeningBrace);
+		isValidCodeBlock(codeBlock);
+		
 		// Assume that if the code has reached this point of execution, then it has
 		// found no errors (Error causes early exiting)
 		isValid = true;
 		isValidated = true;
-		return;
 	}
 
 	// Methods used to parse lines and blocks, alphabetical by Author last name
@@ -208,7 +236,7 @@ public class Validator {
 		// Declare variables
 		Deque<Character> stack = new ArrayDeque<Character>();
 		int index = 0;
-		char character;
+		char character, stackMatch;
 		// Push starting brace to stack
 		stack.push(openingBrace.charAt(0));
 		// while stack is not empty
@@ -227,7 +255,7 @@ public class Validator {
 				stack.push(character);
 			}
 			// when closing brace is encountered, pop from stack
-			char stackMatch = stack.peek();
+			stackMatch = stack.peek();
 			if ((stackMatch == '{' && character == '}') || (stackMatch == '(' && character == ')')
 					|| (stackMatch == '[' && character == ']')) {
 				stack.pop();
