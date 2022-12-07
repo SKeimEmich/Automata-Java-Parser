@@ -96,71 +96,215 @@ public class Validator {
 	}
 
 	// Methods used to parse lines and blocks, alphabetical by Author last name
-
 	/**
-	 * //todo Jon Returns true if the string passed is a valid for loop
-	 *
+	 *author Jon
 	 * @param forLoop
 	 * @return true if forLoop contains a valid loop
 	 */
 	public boolean isValidFor(String forLoop) {
-		// check parameters in () at start of loop, calling other methods like
-		// isValidBoolExp()
-		// Check that there is a valid statement after the declaration of the for loop
-		return true;
+
+		// Check for valid for loop declaration/control block
+		Matcher forMatcher = Pattern.compile("^\\s*for\\(.*;.*;.*\\)\\{$").matcher(forLoop);
+
+		if(forMatcher.find()) {
+			//trim whitespace, extract substring between parentheses
+			forLoop.trim();
+			String forLoopCntrl = forLoop.substring(forLoop.indexOf('(') + 1, forLoop.indexOf(')'));
+
+			//split by ';', then assign each to a string. append ';' to each since their respective parse methods require them
+			String [] forArray = forLoopCntrl.split(";");
+			String counterInit = forArray[0].trim() + ';';  //counter initialization, eg int i = 0
+
+			String forCondition = forArray[1].trim();   //bool, ex: i < 10
+			String inlineOp = forArray[2].trim() + ';';  //operator, ex i++
+
+			//check if all three components of for loop parentheses are valid
+			if(!isValidAssignmentStatement(counterInit))
+				return false;
+			else if(!isValidBoolExpression(forCondition))
+				return false;
+			else if(isValidOperation(inlineOp))
+				return true;
+		}
+		return false;
 	}
 
 	/**
-	 * todo Jon Returns true if the string passed is a valid simple statement
 	 *
+	 * todo Jon needs to pass in other simple statement methods
 	 * @param simpleStatement
 	 * @return True if simple statement is valid
+	 * Jon
 	 */
 	public boolean isValidSimpleStatement(String simpleStatement) {
-		// Check if it is an assignment statement
-		/*check if it is a Sysout, with one or more characters to print
-		if time, can expand to check for variable names etc, otherwise simplify just to line 125*/
 
-		if (simpleStatement.matches("\\s*System\\.out\\.(println|printf|print)\\s*\\(\".+\"\\)")) {
+		//checking if valid print statement
+		if (simpleStatement.matches("\\s*System\\.out\\.(println|printf|print)\\s*\\(\".+\"\\);")) {
 
+			//extract code between parentheses
 			int startIndex = simpleStatement.indexOf('(') + 1;
 			int endIndex = simpleStatement.indexOf(')');
 
-			//inside the parentheses of the print statement
+			//print statement should be a string literal enclosed by quotations
 			String printBlock = simpleStatement.substring(startIndex, endIndex);
-
-			//patterns for print statement (string literal or variable name)
 			Matcher quoteMatcher = Pattern.compile("\".*\"").matcher(printBlock);
-
-			//if a leading quote is found, a closing quote should be found in the string, valid print stmt
 			if (quoteMatcher.find()) {
 				return true;
 			}
 		}
 
-		//inline comment
+		//inline and block comments
 		if(simpleStatement.matches("//.*")){
 			return true;
 		}
 
-		//block comment
 		if(simpleStatement.matches("/\\*.*\\*/")) {
 			return true;
 		}
 
-		//inline increment/decrement
-		if(simpleStatement.matches("[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--)")) {
-			//commented out for the purpose of test passing, since declaredVariables is private
-			//String varSubString = simpleStatement.substring(0, simpleStatement.length() - 2);
-			//if(declaredVariables.containsKey(varSubString))
+		//check if statement is a valid assignment statement
+		if(isValidAssignmentStatement(simpleStatement))
 			return true;
-			//else return false;
-		}
+
+		//check if it's a valid operation
+		if(isValidOperation(simpleStatement))
+			return true;
 
 		//if no true conditions met
 		return false;
 	}
 
+	/*
+	* @param string to be checked for assignment statement
+	* @return true if a valid assignment statement
+	 */
+	public boolean isValidAssignmentStatement(String assignmentStatement) {
+
+		//initialize data type for adding to declaredVariables map
+		DataType type = null;
+
+		//if statement is a simple declaration return true, add variable and its type to map
+		if (assignmentStatement.matches("^\\s*(int|double|boolean|char)\\s+[A-z$_][A-z0-9$_]*;$")) {
+
+			//split declaration statement into type and var name, excluding semicolon
+			String [] statementTokens = assignmentStatement.split(" ");
+			String newVarType = statementTokens[0].trim();
+			String newVar = statementTokens[1].trim().substring(0, statementTokens[1].indexOf(';'));
+
+			//assign its data type and add to the map, then return true
+			switch (newVarType) {
+				case "int" -> type = DataType.INT;
+				case "double" -> type = DataType.DOUBLE;
+				case "boolean" -> type = DataType.BOOLEAN;
+				case "char" -> type = DataType.CHAR;
+			}
+
+			//add variable to map, if successful return true
+			if(addVariable(newVar, type))
+				return true;
+
+			return false;
+		}
+
+		//parsing for assignment, if an '=' is present in the string
+		Matcher assignmentMatcher = Pattern.compile("^[^=]+\\s*=[^=]+;$").matcher(assignmentStatement);
+
+		if (assignmentMatcher.find()) {
+
+			//split by '=' into left and right sides of string, trim to remove any leading/trailing whitespace
+			String[] arr = assignmentStatement.split("=");
+			String leftOfEquals = arr[0].trim();
+			String rightOfEquals = arr[1].substring(0, arr[1].length()).trim();
+
+			String[] varParams = leftOfEquals.split(" ");
+
+			/*if varParams.length is 2, then a declaration is happening along with assignment
+			 *checks if the variable name is a valid variable name, otherwise will not pass
+			 * if valid variable name, then it's added to the map
+			 */
+			if (varParams.length == 2 && varParams[1].matches("[A-z$_][A-z0-9$_]*")) {
+				if (!declaredVariables.containsKey(varParams[1]) && !reservedKeywords.contains(varParams[1])) {
+					DataType varType = null;
+					switch (varParams[0]) {
+						case "boolean":
+							if (isValidBoolExpression(rightOfEquals.substring(0, rightOfEquals.length()-1)))
+								varType = DataType.BOOLEAN;
+							break;
+
+						case "char":
+							if (rightOfEquals.matches("^'[\\x00-\\x7F]';$") | isValidOperation(rightOfEquals))
+								varType = DataType.CHAR;
+							break;
+
+						case "int":
+							if (rightOfEquals.matches("^[0-9]+;$") | isValidOperation(rightOfEquals))
+								varType = DataType.INT;
+							break;
+
+						case "double":
+							if (rightOfEquals.matches("^([0-9]+\\.[0-9]+|[0-9]+);$") | isValidOperation(rightOfEquals))
+								varType = DataType.DOUBLE;
+							break;
+					}
+					addVariable(varParams[1], varType);
+					return true;
+				}
+			}
+
+			/*if varParams.length is 1, then check to see if the variable being assigned is in the map. if it is, grab
+			  its type and check accordingly
+			*/
+
+			if(varParams.length == 1 && varParams[0].trim().matches("[A-z$_][A-z0-9$_]*")) {
+				if((reservedKeywords.contains(varParams[0]))) {
+					return false;
+					//throw new ParserException(String.format("%s: variable name cannot be a reserved keyword, invalid assignment", varParams[0]));
+				}
+
+				if(declaredVariables.containsKey(varParams[0])) {
+					DataType varType = declaredVariables.get(varParams[0]);
+
+					switch(varType) {
+						case BOOLEAN:
+							if (isValidBoolExpression(rightOfEquals.substring(0, rightOfEquals.length()-1)))
+								return true;
+
+						case CHAR:
+							if(rightOfEquals.matches("^'[\\x00-\\x7F]';$") | isValidOperation(rightOfEquals))
+								return true;
+
+						case INT:
+							if(rightOfEquals.matches("^[0-9]+;$") | isValidOperation(rightOfEquals))
+								return true;
+
+						case DOUBLE:
+							if(rightOfEquals.matches("^([0-9]+\\.[0-9]+|[0-9]+);$") | isValidOperation(rightOfEquals))
+								return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	/*
+	 tests for valid operation, allows for +, -, *, /, %
+	 allows for character arithmetic as well as combining number/char
+	 */
+	public boolean isValidOperation(String operation) {
+
+		//checks for valid operation, allows character operations as well
+		Matcher OpMatcher = Pattern.compile("^'?[\\x00-\\x7F]+'?\\s*[+\\-*/%]\\s*'?[\\x00-\\x7F]+'?;$").matcher(operation);
+		if(OpMatcher.find())
+			return true;
+
+		//check if inline operation, eg 'i++'
+		if(operation.matches("\\s*[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--);$"))
+			return true;
+
+		//false if invalid operation
+		return false;
+	}
 
 	/**
 	 * Todo: Jon Returns true if the string passed is a valid method signature
@@ -175,10 +319,11 @@ public class Validator {
 		// and check for a return statement that matches the return type (keep as class
 
 		//if the general structure matches, make sure the name is not a reserved keyword
-		if(methodSignature.matches("\\s*void\\s+[a-zA-z]+\\s*\\(\\s*\\)")){
+
+		if(methodSignature.matches("\\s*public\\s*static\\s*void\\s+[a-zA-z]+\\s*\\(\\s*\\)")){
 			String subString = methodSignature.substring(0, methodSignature.indexOf("("));
 			String[] arr = subString.split("\\s");
-			if(reservedKeywords.contains(arr[1])) {
+			if(reservedKeywords.contains(arr[3])) {
 				throw new ParserException(String.format("%s is a reserved keyword.", arr[1]));
 			}
 			else return true;

@@ -18,27 +18,27 @@ class isValidSimpleStatementTests {
     @Test
     void testValidPrintStatement() {
         //test valid print, println, printf
-        assertTrue(validator.isValidSimpleStatement("System.out.print(\"test string\")"));
+        assertTrue(validator.isValidSimpleStatement("System.out.print(\"test string\");"));
     }
 
     @Test
     void testValidPrintln() {
-        assertTrue(validator.isValidSimpleStatement("System.out.println(\"test string\")"));
+        assertTrue(validator.isValidSimpleStatement("System.out.println(\"test string\");"));
     }
 
     @Test
     void testValidPrintf() {
-        assertTrue(validator.isValidSimpleStatement("System.out.printf(\"test string\")"));
+        assertTrue(validator.isValidSimpleStatement("System.out.printf(\"test string\");"));
     }
 
     @Test
     void testPrintStatementExtraSpaces() {
-        assertTrue(validator.isValidSimpleStatement("System.out.print  (\"test string\")"));
+        assertTrue(validator.isValidSimpleStatement("System.out.print  (\"test string\");"));
     }
 
     @Test
     void testPrintStatementMissingQuote() {
-        assertFalse(validator.isValidSimpleStatement("System.out.print(\t missing quote\")"));
+        assertFalse(validator.isValidSimpleStatement("System.out.print(\t missing quote\");"));
     }
 
     @Test
@@ -58,27 +58,16 @@ class isValidSimpleStatementTests {
     }
 
     @Test
-    void validInlineIncrement() {
-       //validator.declaredVariables.put("testValue", DataType.INT);
-        assertTrue(validator.isValidSimpleStatement("testValue++"));
+    void testAssignmentStatement() {
+        assertTrue(validator.isValidSimpleStatement("int x = 4;"));
     }
 
     @Test
-    void validInlineDecrement() {
-        //validator.declaredVariables.put("testValue", DataType.INT);
-        assertTrue(validator.isValidSimpleStatement("testValue--"));
+    void testOperationStatement() {
+        assertTrue(validator.isValidSimpleStatement("2 + 5.0;"));
     }
 
-    //these tests pass, tested by making declaredVariables public, adding a testValue variable and checking for it
-   /* @Test
-    void invalidVariableIncrement() {
-        validator.declaredVariables.put("testValue", DataType.INT);
-        assertFalse(validator.isValidSimpleStatement("wrongVar++"));
-    }
 
-    @Test
-    void invalidVariableDecrement() {
-        validator.declaredVariables.put("testValue", DataType.INT);
-        assertFalse(validator.isValidSimpleStatement("wrongVar--"));
-    }*/
+
+
 }

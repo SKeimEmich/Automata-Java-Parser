@@ -12,12 +12,12 @@ class isValidMethodSigTests {
 
     @Test
     void validMethodSig() {
-        assertTrue(validator.isValidMethodSignature("void testMethod()"));
+        assertTrue(validator.isValidMethodSignature("public static void testMethod()"));
     }
 
     @Test
     void mustReturnVoid() {
-        assertFalse(validator.isValidMethodSignature("int testMethod()"));
+        assertFalse(validator.isValidMethodSignature("public static int testMethod()"));
     }
 
     @Test
@@ -32,13 +32,13 @@ class isValidMethodSigTests {
 
     @Test
     void testExtraSpacesAllowedInSignature() {
-        assertTrue(validator.isValidMethodSignature("void      testMethod     (   )"));
+        assertTrue(validator.isValidMethodSignature("public static void      testMethod     (   )"));
 
     }
 
     @Test
     void testForReservedKeywordName() {
-        assertThrows(ParserException.class, () -> validator.isValidMethodSignature("void enum()"));
+        assertThrows(ParserException.class, () -> validator.isValidMethodSignature("public static void enum()"));
     }
 
 
