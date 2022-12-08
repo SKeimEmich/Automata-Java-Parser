@@ -8,7 +8,7 @@ import main.Validator;
 
 class AddVariableTests {
 
-	Validator validator = new Validator("NoFileProvided");
+	Validator validator = new Validator();
 
 	@Test
 	void testValid() {

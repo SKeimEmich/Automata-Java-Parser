@@ -7,7 +7,7 @@ import exceptions.ParserException;
 
 class isValidMethodSigTests {
 
-    Validator validator = new Validator("no file provided");
+    Validator validator = new Validator();
 
 
     @Test

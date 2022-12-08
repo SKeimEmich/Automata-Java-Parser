@@ -12,7 +12,7 @@ import main.Validator;
 
 class GetTypeTests {
 
-	Validator validator = new Validator("NoFileProvided");
+	Validator validator = new Validator();
 
 	@Test
 	void testInt() {

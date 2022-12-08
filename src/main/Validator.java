@@ -26,8 +26,15 @@ public class Validator {
 	private Stack<Character> parens;
 
 	// Constructor
-
+	public Validator() {
+		getReservedKeywords();
+		declaredVariables = new HashMap<>();
+		isValidated = false;
+		isValid = false; // Assume invalid
+	}
+	
 	public Validator(String fileName) {
+		this();
 		// Construct a scanner object to read from file
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(fileName));
@@ -47,12 +54,6 @@ public class Validator {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-
-		getReservedKeywords();
-		declaredVariables = new HashMap<>();
-		isValidated = false;
-		isValid = false; // Assume invalid
 	}
 
 	// Setup Methods for the constructor to use
@@ -100,10 +101,10 @@ public class Validator {
 
 		// get indices of code block braces
 		int indexOfOpeningBrace = code.indexOf("{");
-		int indexOfClosingBrace = getPositionOfClosingBrace(code.substring(indexOfOpeningBrace));
+		int indexOfClosingBrace = getPositionOfClosingBrace(code.substring(indexOfOpeningBrace)) + indexOfOpeningBrace;
 
 		// if there is text after the closing brace, throw an error
-		if(code.substring(indexOfClosingBrace).isBlank()) {
+		if(!code.substring(indexOfClosingBrace + 1).isBlank()) {
 			throw new ParserException("Cannot have code outside of method code block.");
 		}
 
@@ -117,7 +118,7 @@ public class Validator {
 		isValidMethodSignature(methodSignature);
 
 		// get code block (block belonging to method)
-		String codeBlock = code.substring(indexOfOpeningBrace);
+		String codeBlock = code.substring(indexOfOpeningBrace + 1, indexOfClosingBrace);
 		isValidCodeBlock(codeBlock);
 
 		// Assume that if the code has reached this point of execution, then it has
@@ -621,21 +622,22 @@ public class Validator {
 	 * @return True if the code block is valid.
 	 */
 	public boolean isValidCodeBlock(String codeBlock) {
-		// Check if beginning of string is a keyword for a complex statement
-		// if so, read up to end of that statement and send to isValidStatement
-		// if not, read up to ; and send to isValidSimpleStatement
-		// loop until end is reached, must end with }
-
+//		codeBlock = codeBlock.trim(); // white space removal
+//		// statements: while, switch, if, for, dowhile
+//		// check if beginning of string is statement keyword
+//		
+//		System.out.println(codeBlock);
+//		if(codeBlock.matches("\\A\\s*if\\s*\\(.+\\).*")) {
+//			System.out.println("Matches!");
+//		} else {
+//			System.out.println("Doesn't match!");
+//		}
+			// depending on presence of { or ;, find end of statement
+			// send to appropriate method
+			
+		// if it is not a statement keyword
+		// read to ; and send to simple statement
 		return true;
 	}
 
-	/**
-	 *
-	 */
-	public boolean isValidStatement(String statement) {
-		// Check if it begins with a keyword (if, for, while, do, switch)
-		// send to appropriate method
-		// if not, throw a fit
-		return true;
-	}
 }

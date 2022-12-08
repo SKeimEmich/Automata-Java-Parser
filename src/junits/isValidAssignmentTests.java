@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class isValidAssignmentTests {
-    Validator validator = new Validator("no file provided");
+    Validator validator = new Validator();
 
     @Test
     void testvalidDeclaration() {

@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class isValidSimpleStatementTests {
 
-    Validator validator = new Validator("no file provided");
+    Validator validator = new Validator();
 
     @Test
     void testValidPrintStatement() {

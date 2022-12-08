@@ -9,7 +9,7 @@ import main.Validator;
 
 class IsValidIfTests {
 
-	Validator validator = new Validator("NoFileProvided");
+	Validator validator = new Validator();
 
 	@Test
 	void testValid() {

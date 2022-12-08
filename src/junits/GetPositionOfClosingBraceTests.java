@@ -9,7 +9,7 @@ import main.Validator;
 
 class GetPositionOfClosingBraceTests {
 
-	Validator validator = new Validator("NoFileProvided");
+	Validator validator = new Validator();
 	
 	@Test
 	void testValidCurly() {
