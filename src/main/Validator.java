@@ -1,8 +1,13 @@
 package main;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -13,7 +18,7 @@ import java.util.regex.Pattern;
 import exceptions.ParserException;
 
 public class Validator {
-	private Scanner code; // Shouldn't be touched outside of this class
+	private String code; // Shouldn't be touched outside of this class
 	private ArrayList<String> reservedKeywords;
 	private Map<String, DataType> declaredVariables;
 	private boolean isValidated;
@@ -21,12 +26,26 @@ public class Validator {
 	private Stack<Character> parens;
 
 	// Constructor
-	public Validator(String filename) {
-		// TODO Fix this so it reads file as scanner object
-		code = null;
-
-//		scan.useDelimiter(";"); // TODO This delimiter may need to be changed
-//		Should it be \n? How do we evaluate a file with no line breaks, could we recurse when we hit a ;?
+	public Validator(String fileName) {
+		// Construct a scanner object to read from file
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(fileName));
+			StringBuilder sb = new StringBuilder();
+			String line = null;
+			String separator = "\n";
+			while((line = reader.readLine()) != null) {
+				sb.append(line);
+				sb.append(separator);
+			}
+			// remove last line separator
+			sb.deleteCharAt(sb.length() - 1);
+			reader.close();
+			code = sb.toString();
+		} catch (FileNotFoundException fnfe) {
+			System.err.printf("File %s not found, please try again.", fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		getReservedKeywords();
 		declaredVariables = new HashMap<>();
@@ -35,16 +54,15 @@ public class Validator {
 	}
 
 	// Setup Methods for the constructor to use
-
 	/**
 	 * Reads in Java Reserved Keywords from file
-	 *
+	 * 
 	 * @return List of reserved keywords
 	 */
 	private ArrayList<String> getReservedKeywords() {
 		Scanner s = null;
 		try {
-			s = new Scanner(new File("Automata-Java-Parser/ReservedKeywords.txt"));
+			s = new Scanner(new File("ReservedKeywords.txt"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -69,33 +87,45 @@ public class Validator {
 
 	/**
 	 * Tests if the file scanned by Scanner object contains valid Java code.
-	 *
+	 * 
 	 * @param scan
 	 */
 	public void validate() {
 		// check if the code has been scanned already, escape to prevent duplicate scans
-
-		String nextLine;
-		while (code.hasNext()) {
-			nextLine = code.next(); // Uses delimiter outlined when scanner was constructed
-			if (nextLine.contains("if(") || nextLine.contains("if (")) { // There's probably a way to check with a
-				// regex?
-				if (isValidIf(nextLine)) {
-
-				} else {
-					return; // Not valid, exit method
-				}
-			}
+		if(isValidated) {
+			return;
 		}
+
+		// get indices of code block braces
+		int indexOfOpeningBrace = code.indexOf("{");
+		int indexOfClosingBrace = getPositionOfClosingBrace(code.substring(indexOfOpeningBrace));
+
+		// if there is text after the closing brace, throw an error
+		if(code.substring(indexOfClosingBrace).isBlank()) {
+			throw new ParserException("Cannot have code outside of method code block.");
+		}
+
+		// if there is no opening brace, throw an error
+		if(indexOfOpeningBrace == -1) {
+			throw new ParserException("No code block exists.");
+		}
+
+		// Validate method signature
+		String methodSignature = code.substring(0, indexOfOpeningBrace);
+		isValidMethodSignature(methodSignature);
+
+		// get code block (block belonging to method)
+		String codeBlock = code.substring(indexOfOpeningBrace);
+		isValidCodeBlock(codeBlock);
 
 		// Assume that if the code has reached this point of execution, then it has
 		// found no errors (Error causes early exiting)
 		isValid = true;
 		isValidated = true;
-		return;
 	}
 
 	// Methods used to parse lines and blocks, alphabetical by Author last name
+
 	/**
 	 *author Jon
 	 * @param forLoop
@@ -328,7 +358,7 @@ public class Validator {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Tests if the string passed is a valid if statement and it contains a valid
 	 * statement or code block.
@@ -338,19 +368,90 @@ public class Validator {
 	 */
 	public boolean isValidIf(String ifBlock) {
 		// Author Sam
-		// if not valid IF, throw Exception
-		// Check if it contains a valid bool
-		if (ifBlock.matches("\\s*if\\s?\\(.+\\).*")) {
-			// inc first index, exc last index
-			// Check if it contains a valid boolean expression
-			int startIndex = ifBlock.indexOf('(') + 1;
-			int endIndex = ifBlock.indexOf(')');
-			if (isValidBoolExpression(ifBlock.substring(startIndex, endIndex))) {
-				// TODO Sam process rest of line after closing paren of if block, throw errors where appropriate
-				return true;
+
+		// Check if the IF statement does not match the pattern "if() "
+		if (!ifBlock.matches("\\A\\s*if\\s?\\(.+\\).*")) {
+			throw new ParserException(String.format("Invalid if statement: \"%s\".", ifBlock));
+		}
+
+		// It does match the pattern for IF(), proceed
+
+		// inc first index, exc last index
+		// Check if it contains a valid boolean expression
+		int startIndex = ifBlock.indexOf('(') + 1;
+		int endIndex = ifBlock.indexOf(')');
+		if (!isValidBoolExpression(ifBlock.substring(startIndex, endIndex))) {
+			throw new ParserException("I don't know how you got here, so congratulations on that.");
+		}
+
+		// remove if() from ifBlock
+		String remainingIf = ifBlock.substring(endIndex + 1).trim();
+		// If there's nothing after the if statement, it's invalid
+		if (remainingIf.length() == 0) {
+			throw new ParserException(String.format("Invalid if statement %s, expected statement at end.", ifBlock));
+		}
+
+		// Get block of code if it exists
+		if (remainingIf.charAt(0) == '{') {
+			int indexOfClosingBrace = getPositionOfClosingBrace(remainingIf);
+			if (indexOfClosingBrace > 0) {
+				String codeBlock = remainingIf.substring(0, indexOfClosingBrace + 1);
+				isValidCodeBlock(codeBlock); // This method will throw an error if it is invalid
+			}
+		} else {
+			// Remaining code in block is assumed to be a simple statement
+			isValidSimpleStatement(remainingIf); // This method will throw an error if it is invalid
+		}
+		return true;
+	}
+
+	/**
+	 * Returns the index of the closing brace.
+	 *
+	 * @param code that begins with an opening brace
+	 * @return index of closing brace that matches first brace, or -1 if code does
+	 *         not begin with an opening brace
+	 */
+	public int getPositionOfClosingBrace(String code) {
+		// Author Sam
+		// trim code block as redundancy
+		code = code.trim();
+		// the code passed should start with an opening brace ( {, (, or [ )
+		String openingBrace = Character.toString(code.charAt(0));
+		if (!openingBrace.matches("(\\{|\\(|\\[)")) { // Confirm that code begins with opening brace
+			return -1;
+		}
+		// Find the index of the brace that closes this block
+		// Declare variables
+		Deque<Character> stack = new ArrayDeque<Character>();
+		int index = 0;
+		char character, stackMatch;
+		// Push starting brace to stack
+		stack.push(openingBrace.charAt(0));
+		// while stack is not empty
+		while (!stack.isEmpty()) {
+			index++;
+			// if we've reached the end of the string and the stack is not empty, throw an
+			// error
+			if (index == code.length()) {
+				throw new ParserException(String.format("Braces do not match within code block, %s is not closed.%n%s",
+						stack.peek(), code));
+			}
+			// iterate over string
+			character = code.charAt(index);
+			// push opening braces to stack
+			if (character == '{' || character == '(' || character == '[') {
+				stack.push(character);
+			}
+			// when closing brace is encountered, pop from stack
+			stackMatch = stack.peek();
+			if ((stackMatch == '{' && character == '}') || (stackMatch == '(' && character == ')')
+					|| (stackMatch == '[' && character == ']')) {
+				stack.pop();
 			}
 		}
-		throw new ParserException(String.format("Invalid if statement: \"%s\".", ifBlock));
+		// return index when stack is empty
+		return index;
 	}
 
 	/**
@@ -374,7 +475,6 @@ public class Validator {
 			return isValidBoolExpression(firstHalf) && isValidBoolExpression(secondHalf);
 		}
 
-
 		// Does the string contain a valid comparator operator? { <, >, ==, !=, <=, >= }
 		Matcher matcher = Pattern.compile("(<=?|>=?|==|!=)").matcher(boolExp);
 		if (!matcher.find()) {
@@ -383,17 +483,18 @@ public class Validator {
 			if (getType(boolExp) == DataType.BOOLEAN) {
 				return true;
 			}
-			throw new ParserException(String.format("Could not find a valid operator in the expression \"%s\".", boolExp));
+			throw new ParserException(
+					String.format("Could not find a valid operator in the expression \"%s\".", boolExp));
 		} else { // operators were found in boolExp, continue
 			// Get index of operator
 			int operatorIndex = matcher.end();
-			
+
 			// Separate operands into substrings
 			String leftOperand = boolExp.substring(0, operatorIndex).replaceAll("(<=?|>=?|==|!=)", "").trim();
 			String rightOperand = boolExp.substring(operatorIndex).replaceAll("(<=?|>=?|==|!=)", "").trim();
-			
+
 			// Cannot compare booleans
-			if(getType(leftOperand) == DataType.BOOLEAN || getType(rightOperand) == DataType.BOOLEAN ) {
+			if (getType(leftOperand) == DataType.BOOLEAN || getType(rightOperand) == DataType.BOOLEAN) {
 				throw new ParserException("Error, cannot compare booleans.");
 			}
 
@@ -505,20 +606,26 @@ public class Validator {
 	}
 
 	/**
-	 * Returns true if the parentheses or bracket passed to the method either:
-	 * Successfully closes a set of parentheses or brackets. Is successfully added
-	 * to the stack.
-	 * 
-	 * @param paren
-	 * @return True if the parentheses is correctly placed.
+	 * Returns true if the string passed is a valid code block.
+	 *
+	 * @param String codeBlock
+	 * @return True if the code block is valid.
 	 */
-	public boolean isValidParens(char paren) {
-		// Check if opening or closing bracket
-		// if Opening, add to stack, return true
-		// if Closing, peek at stack to see if it matches the one at the top
-		// if it does match, pop and return true
-		// if it does not match, throw an exception
+	public boolean isValidCodeBlock(String codeBlock) {
+		// Check if beginning of string is a keyword for a complex statement
+		// if so, read up to end of that statement and send to isValidStatement
+		// if not, read up to ; and send to isValidSimpleStatement
+		// loop until end is reached, must end with }
 		return true;
 	}
 
+	/**
+	 *
+	 */
+	public boolean isValidStatement(String statement) {
+		// Check if it begins with a keyword (if, for, while, do, switch)
+		// send to appropriate method
+		// if not, throw a fit
+		return true;
+	}
 }
