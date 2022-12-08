@@ -41,17 +41,6 @@ class isValidOperationTest {
         assertTrue(validator.isValidOperation("testValue--;"));
     }
 
-    //these tests pass, tested by making declaredVariables public, adding a testValue variable and checking for it
-   /* @Test
-    void invalidVariableIncrement() {
-        validator.declaredVariables.put("testValue", DataType.INT);
-        assertFalse(validator.isValidOperation("wrongVar++"));
-    }
-
-    @Test
-    void invalidVariableDecrement() {
-        validator.declaredVariables.put("testValue", DataType.INT);
-        assertFalse(validator.isValidOperation("wrongVar--"));
-    }*/
+    //todo: add tests for invalid variable decrements
 
 }
