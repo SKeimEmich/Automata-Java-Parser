@@ -16,4 +16,5 @@ import org.junit.runners.Suite;
 	isValidForTests.class,
 	isValidOperationTest.class
 })
+
 public class TestSuite{}

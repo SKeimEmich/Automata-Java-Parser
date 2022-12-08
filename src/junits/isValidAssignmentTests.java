@@ -100,4 +100,5 @@ class isValidAssignmentTests {
         assertFalse(validator.isValidAssignmentStatement("return = 234.0;"));
         assertFalse(validator.isValidAssignmentStatement("break = 222.0;"));
     }
+
 }
