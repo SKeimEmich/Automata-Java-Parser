@@ -19,31 +19,31 @@ class GetTypeTests {
 		String data = "123";
 		assertEquals(DataType.INT, validator.getType(data));
 	}
-	
+
 	@Test
 	void testIntNegative() {
 		String data = "-123";
 		assertEquals(DataType.INT, validator.getType(data));
 	}
-	
+
 	@Test
 	void testDouble() {
 		String data = "3.14";
 		assertEquals(DataType.DOUBLE, validator.getType(data));
 	}
-	
+
 	@Test
 	void testDoubleNegative() {
 		String data = "-3.14";
 		assertEquals(DataType.DOUBLE, validator.getType(data));
 	}
-	
+
 	@Test
 	void testBoolean() {
 		String data = "true";
 		assertEquals(DataType.BOOLEAN, validator.getType(data));
 	}
-	
+
 	@Test
 	void testChar() {
 		String data = "\'a\'";
@@ -56,7 +56,7 @@ class GetTypeTests {
 		validator.addVariable(variableName, DataType.DOUBLE);
 		assertEquals(DataType.DOUBLE, validator.getType(variableName));
 	}
-	
+
 	@Test
 	void testInvalidData() {
 		String data = "TRUE3.14";
@@ -67,7 +67,7 @@ class GetTypeTests {
 	void testEmpty() {
 		testInvalid("   \n", "Invalid data type, data was blank.");
 	}
-	
+
 	void testInvalid(String data, String expected) {
 		Exception e = assertThrows(ParserException.class, () -> {
 			validator.getType(data);

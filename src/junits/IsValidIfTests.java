@@ -8,7 +8,7 @@ import exceptions.ParserException;
 import main.Validator;
 
 class IsValidIfTests {
-	
+
 	Validator validator = new Validator("NoFileProvided");
 
 	@Test
@@ -36,7 +36,7 @@ class IsValidIfTests {
 		String expected = String.format("Invalid if statement: \"%s\".", ifStatement);
 		testInvalid(ifStatement, expected);
 	}
-	
+
 	@Test
 	void testInvalidClosingBrace() {
 		String ifStatement = "if(true";
@@ -57,13 +57,15 @@ class IsValidIfTests {
 		String expected = String.format("Invalid if statement: \"%s\".", ifStatement);
 		testInvalid(ifStatement, expected);
 	}
+
 	
 	void testInvalid(String ifStatement, String expected) {
+
 		Exception e = assertThrows(ParserException.class, () -> {
 			validator.isValidIf(ifStatement);
 		});
 		String actual = e.getMessage();
-		assertTrue(actual.contains(expected));		
+		assertTrue(actual.contains(expected));
 	}
 
 }

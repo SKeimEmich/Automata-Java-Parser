@@ -26,6 +26,7 @@ public class Validator {
 	private Stack<Character> parens;
 
 	// Constructor
+
 	public Validator(String fileName) {
 		// Construct a scanner object to read from file
 		try {
@@ -46,6 +47,7 @@ public class Validator {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 
 		getReservedKeywords();
 		declaredVariables = new HashMap<>();
@@ -370,6 +372,7 @@ public class Validator {
 	public boolean isValidIf(String ifBlock) {
 		// Author Sam
 
+
 		// Check if the IF statement does not match the pattern "if() "
 		if (!ifBlock.matches("\\A\\s*if\\s?\\(.+\\).*")) {
 			throw new ParserException(String.format("Invalid if statement: \"%s\".", ifBlock));
@@ -398,6 +401,7 @@ public class Validator {
 			if (indexOfClosingBrace > 0) {
 				String codeBlock = remainingIf.substring(0, indexOfClosingBrace + 1);
 				isValidCodeBlock(codeBlock); // This method will throw an error if it is invalid
+
 			}
 		} else {
 			// Remaining code in block is assumed to be a simple statement
@@ -584,7 +588,7 @@ public class Validator {
 
 	/**
 	 * Returns true if the string passed is a valid Switch Statement
-	 * 
+	 * TODO Katie
 	 * @param switchBlock
 	 * @return True if Switch statement is valid
 	 */
@@ -596,7 +600,7 @@ public class Validator {
 
 	/**
 	 * Returns true if the string passed is a valid While Loop
-	 * 
+	 * TODO Katie
 	 * @param whileLoop
 	 * @return True if while loop is valid
 	 */
@@ -606,7 +610,8 @@ public class Validator {
 		return true;
 	}
 
-	/**
+
+  /*
 	 * Returns true if the string passed is a valid code block.
 	 *
 	 * @param String codeBlock
@@ -617,6 +622,7 @@ public class Validator {
 		// if so, read up to end of that statement and send to isValidStatement
 		// if not, read up to ; and send to isValidSimpleStatement
 		// loop until end is reached, must end with }
+
 		return true;
 	}
 
