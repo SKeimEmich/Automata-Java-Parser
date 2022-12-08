@@ -532,6 +532,7 @@ public class Validator {
 		return index;
 	}
 
+	
 	/**
 	 * Returns true if the string is a valid boolean expression
 	 * 
@@ -667,6 +668,11 @@ public class Validator {
 	 */
 	public boolean isValidSwitch(String switchBlock) {
 		// Check types in block, do they all match?
+		if (switchBlock.matches("\\A\\s*switch\\?\\(.+\\).*:")) {
+			
+		}
+		
+		
 		// is the syntax correct?
 		return true;
 	}
@@ -678,23 +684,56 @@ public class Validator {
 	 * @return True if while loop is valid
 	 */
 	public boolean isValidWhile(String whileLoop) {
+		// Author Katie 
 		// Check that block is a valid block
-		// Check that statement at beginning of block contains a valid boolean expression
-		return true;
-	}
 
-	/**
-	 * Returns true if the string passed is a valid Do-While Loop TODO Katie
-	 * 
-	 * @param doWhileLoop
-	 * @return True if do-while loop is valid
-	 */
-	public boolean isValidDoWhile(String doWhileLoop) {
-		// Check that block is a valid block
-		// Check that statement at end of block contains a valid boolean expression
+		// Check that statement at beginning of block contains a valid boolean expression
+
+		if (whileLoop.matches("\\A\\s*while\\s?\\(.+\\).*")) {
+			// inc first index, exc last index
+			// Check if it contains a valid boolean expression
+			int startIndex = whileLoop.indexOf('(') + 1;
+			int endIndex = whileLoop.indexOf(')');
+			if (isValidBoolExpression(whileLoop.substring(startIndex, endIndex))) {
+				// TODO Katie process rest of line after closing paren of while block, throw errors
+				// where appropriate
+				isValidCodeBlock(whileLoop);
+				return true;
+			}
+		}
 		return true;
 	}
 	
+	/**
+	 * Returns true if the string passed is a valid While Loop
+	 * TODO Katie
+	 * @param doWhileLoop
+	 * @return True if doWhileLoop is valid
+	 */
+
+	public boolean isValidDoWhile(String doWhileLoop) {
+		//Author Katie
+		if (doWhileLoop.matches("\\A\\s*do\\s?{.+\\}.\\s*while\\s?(.+\\).*")) {
+			// inc first index, exc last index
+			// Check if it contains a valid boolean expression
+			int startIndex = doWhileLoop.indexOf('(') + 1;
+			int endIndex = doWhileLoop.indexOf(')');
+			// Check that statement at end of block contains a valid boolean expression
+			if (isValidBoolExpression(doWhileLoop.substring(startIndex, endIndex))) {
+				// TODO Katie process rest of line after closing paren of do block, throw errors
+				// where appropriate
+				// TODO will change when we have a isValidCodeBlock method
+				int start = doWhileLoop.indexOf('{') + 1;
+				int end = doWhileLoop.indexOf('}');
+				if (isValidCodeBlock(doWhileLoop.substring(start, end))){
+					return true;
+				}
+			}
+		}
+		
+		return true;
+	}
+
 	/*
 	 * Returns true if the string passed is a valid code block.
 	 *
@@ -795,5 +834,7 @@ public class Validator {
 		} 
 		throw new ParserException("Invalid complex statement, error unknown.");
 	}
+	
+	
 
 }
