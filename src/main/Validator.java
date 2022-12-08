@@ -400,12 +400,15 @@ public class Validator {
 			int indexOfClosingBrace = getPositionOfClosingBrace(remainingIf);
 			if (indexOfClosingBrace > 0) {
 				String codeBlock = remainingIf.substring(0, indexOfClosingBrace + 1);
-				isValidCodeBlock(codeBlock); // This method will throw an error if it is invalid
-
+				if(!isValidCodeBlock(codeBlock)) {
+					throw new ParserException("I don't know how you got here, so congratulations on that.");
+				}
 			}
 		} else {
 			// Remaining code in block is assumed to be a simple statement
-			isValidSimpleStatement(remainingIf); // This method will throw an error if it is invalid
+			if(!isValidSimpleStatement(remainingIf)) {
+				throw new ParserException("I don't know how you got here, so congratulations on that.");
+			}
 		}
 		return true;
 	}

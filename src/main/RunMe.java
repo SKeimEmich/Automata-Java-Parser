@@ -13,12 +13,14 @@ public class RunMe {
 		// Run with file provided by args, if available
 		// If no file provided, ask user for filename
 		// Check if file contains valid code
-		Validator validator = new Validator("Code.txt");
-		validator.validate();
-		if(validator.isValid()) {
-			// Print result
-			System.out.println("The code provided in this file is valid.\nThank you for using our parser.");
-		}
+		System.out.println("hello world");
+		System.exit(0);
+//		Validator validator = new Validator("Code.txt");
+//		validator.validate();
+//		if(validator.isValid()) {
+//			// Print result
+//			System.out.println("The code provided in this file is valid.\nThank you for using our parser.");
+//		}
 	}
 
 }
