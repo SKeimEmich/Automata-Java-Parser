@@ -67,7 +67,4 @@ class isValidSimpleStatementTests {
         assertTrue(validator.isValidSimpleStatement("2 + 5.0;"));
     }
 
-
-
-
 }

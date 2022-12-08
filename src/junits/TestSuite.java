@@ -11,7 +11,9 @@ import org.junit.runners.Suite;
 	IsValidIfTests.class,
 	IsValidBoolExpressionTests.class,
 	isValidSimpleStatementTests.class,
-	isValidMethodSigTests.class
-
+	isValidMethodSigTests.class,
+	isValidAssignmentTests.class,
+	isValidForTests.class,
+	isValidOperationTest.class
 })
 public class TestSuite{}
