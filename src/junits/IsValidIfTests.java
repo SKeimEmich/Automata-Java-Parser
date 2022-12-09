@@ -2,15 +2,23 @@ package junits;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import exceptions.ParserException;
+import main.DataType;
 import main.Validator;
 
 class IsValidIfTests {
 
-	Validator validator = new Validator();
+	static Validator validator = new Validator();
 
+	@BeforeAll
+	static void setup() {
+		validator.addVariable("i", DataType.INT);
+	}
+	
 	@Test
 	void testValid() {
 		assertTrue(validator.isValidIf("if(true) {i = 2;}"));
