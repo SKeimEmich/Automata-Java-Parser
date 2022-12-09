@@ -137,7 +137,7 @@ public class Validator {
 	public boolean isValidFor(String forLoop) {
 
 		// Check for valid for loop declaration/control block
-		Matcher forMatcher = Pattern.compile("^\\s*for\\(.*;.*;.*\\)\\{$").matcher(forLoop);
+		Matcher forMatcher = Pattern.compile("^\\s*for\\(.*;.*;.*\\)\\{").matcher(forLoop);
 
 		if (forMatcher.find()) {
 			// trim whitespace, extract substring between parentheses
