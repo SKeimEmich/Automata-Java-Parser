@@ -65,7 +65,7 @@ public class Validator {
 	private ArrayList<String> getReservedKeywords() {
 		Scanner s = null;
 		try {
-			s = new Scanner(new File("ReservedKeywords.txt"));
+			s = new Scanner(new File("./Automata-Java-Parser/ReservedKeywords.txt"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -137,7 +137,7 @@ public class Validator {
 	public boolean isValidFor(String forLoop) {
 
 		// Check for valid for loop declaration/control block
-		Matcher forMatcher = Pattern.compile("^\\s*for\\(.*;.*;.*\\)\\{").matcher(forLoop);
+		Matcher forMatcher = Pattern.compile("^\\s*for\\(.*;.*;.*\\)[\\s\\S]*").matcher(forLoop);
 
 		if (forMatcher.find()) {
 			// trim whitespace, extract substring between parentheses
@@ -158,8 +158,27 @@ public class Validator {
 				throw new ParserException(String.format("%s : not a valid boolean loop control", forCondition));
 			 if(!isValidOperation(inlineOp))
 				throw new ParserException(String.format("%s : not a valid loop counter increment/decrement", inlineOp));
-			return true;
 
+			 /*code below, up to 'return true' comes from sam's ifBlock method, with renaming of variables for this method*/
+			// remove for(....) from forLoop
+			String remainingFor = forLoop.substring(forLoop.indexOf(')') + 1).trim();
+
+			// Get block of code if it exists
+			if (remainingFor.charAt(0) == '{') {
+				int indexOfClosingBrace = getPositionOfClosingBrace(remainingFor);
+				if (indexOfClosingBrace > 0) {
+					String codeBlock = remainingFor.substring(1, indexOfClosingBrace - 1).trim();
+					if (!isValidCodeBlock(codeBlock)) {
+						throw new ParserException("I don't know how you got here, so congratulations on that.");
+					}
+				}
+			} else {
+				// Remaining code in block is assumed to be a simple statement
+				if (!isValidSimpleStatement(remainingFor)) {
+					throw new ParserException("I don't know how you got here, so congratulations on that.");
+				}
+			}
+			return true;
 		}
 		//thrown if string did not match for loop declaration structure at all
 		throw new ParserException(String.format("%s : not a valid for loop declaration", forLoop));
@@ -353,14 +372,14 @@ public class Validator {
 	 */
 	public boolean isValidOperation(String operation) {
 
-		// checks for valid operation, allows character operations as well
+		//checks for valid operation, allows character operations as well
 		Matcher OpMatcher = Pattern.compile("^'?[\\x00-\\x7F]+'?\\s*[+\\-*/%]\\s*'?[\\x00-\\x7F]+'?;$")
 				.matcher(operation);
 		if (OpMatcher.find())
 			return true;
 
 		// check if inline operation, eg 'i++'
-		if (operation.matches("\\s*[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--);$"))
+		if (operation.matches("\\s*[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--);"))
 			return true;
 
 		// false if invalid operation

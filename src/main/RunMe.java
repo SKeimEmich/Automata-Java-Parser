@@ -14,7 +14,7 @@ public class RunMe {
 		// If no file provided, ask user for filename
 		// Check if file contains valid code
 
-		Validator validator = new Validator("Code.txt");
+		Validator validator = new Validator("./Automata-Java-Parser/Code.txt");
 		validator.validate();
 		if(validator.isValid()) {
 			// Print result
