@@ -30,17 +30,18 @@ class isValidOperationTest {
     }
 
     @Test
-    void validInlineIncrement() {
+    void validInlineOps() {
         //validator.declaredVariables.put("testValue", DataType.INT);
         assertTrue(validator.isValidOperation("testValue++;"));
-    }
-
-    @Test
-    void validInlineDecrement() {
-        //validator.declaredVariables.put("testValue", DataType.INT);
         assertTrue(validator.isValidOperation("testValue--;"));
     }
 
-    //todo: add tests for invalid variable decrements
+    @Test
+    void testInvalidInlineOps() {
+        assertFalse(validator.isValidOperation("testValue-;"));
+        assertFalse(validator.isValidOperation("testValue+;"));
+        assertFalse(validator.isValidOperation("testValue;"));
+        assertFalse(validator.isValidOperation("testValue+++"));
+    }
 
 }

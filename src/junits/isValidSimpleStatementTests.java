@@ -38,7 +38,8 @@ class isValidSimpleStatementTests {
 
     @Test
     void testPrintStatementMissingQuote() {
-        assertFalse(validator.isValidSimpleStatement("System.out.print(\t missing quote\");"));
+       assertThrows(ParserException.class, () -> validator.isValidSimpleStatement("System.out.print(\t missing quote\");"));
+
     }
 
     @Test
@@ -54,7 +55,20 @@ class isValidSimpleStatementTests {
     @Test
     //test case when ending block symbol is missing
     void inValidBlockCommentTest() {
-        assertFalse(validator.isValidSimpleStatement("/*asdflajsdfkl"));
+        assertThrows(ParserException.class, () -> validator.isValidSimpleStatement("/*asdflajsdfkl"));
+    }
+
+    @Test
+    void testVariableDeclaration() {
+        assertTrue(validator.isValidSimpleStatement("int test;"));
+        assertTrue(validator.isValidSimpleStatement("boolean y;"));
+        assertTrue(validator.isValidSimpleStatement("double x;"));
+        assertTrue(validator.isValidSimpleStatement("char z;"));
+    }
+
+    @Test
+    void testInvalidVariableDeclaration() {
+        assertThrows(ParserException.class, () -> validator.isValidSimpleStatement("int return"));
     }
 
     @Test

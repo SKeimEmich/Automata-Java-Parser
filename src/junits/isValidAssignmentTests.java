@@ -2,20 +2,12 @@ package junits;
 
 import main.Validator;
 import org.junit.jupiter.api.Test;
+import main.DataType;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class isValidAssignmentTests {
     Validator validator = new Validator();
-
-    @Test
-    void testvalidDeclaration() {
-        assertTrue(validator.isValidAssignmentStatement("int test;"));
-        assertTrue(validator.isValidAssignmentStatement("boolean y;"));
-        assertTrue(validator.isValidAssignmentStatement("double x;"));
-        assertTrue(validator.isValidAssignmentStatement("char z;"));
-    }
-
 
     @Test
     void testInvalidDeclaration() {
@@ -24,7 +16,7 @@ class isValidAssignmentTests {
         assertFalse(validator.isValidAssignmentStatement("String x;"));
         assertFalse(validator.isValidAssignmentStatement("double test"));
 
-        //return false if varname is reserved keyword
+        //return false if variable name is reserved keyword
         assertFalse(validator.isValidAssignmentStatement("float return;"));
         assertFalse(validator.isValidAssignmentStatement("float float;"));
     }
@@ -45,6 +37,7 @@ class isValidAssignmentTests {
     void testValidIntAssignment() {
         assertTrue(validator.isValidAssignmentStatement("int a = 1000;"));
         assertTrue(validator.isValidAssignmentStatement("int b = 234 % 5;"));
+        assertTrue(validator.isValidAssignmentStatement("int j = 0;"));
     }
 
     @Test
@@ -74,13 +67,9 @@ class isValidAssignmentTests {
         assertFalse(validator.isValidAssignmentStatement("double int = 2.0;"));
     }
 
-    //PASTE THESE INTO METHOD FOR TESTING THE FOLLOWING TESTS (LINE 244)
-    //declaredVariables.put("doubleTest", DataType.DOUBLE);
-    //declaredVariables.put("intTest", DataType.INT);
-    //declaredVariables.put("charTest", DataType.CHAR);
-    //declaredVariables.put("boolTest", DataType.BOOLEAN);
     @Test
     void testExistingVarAssignment() {
+        addVariables();
         assertTrue(validator.isValidAssignmentStatement("doubleTest = 234.0;"));
         assertTrue(validator.isValidAssignmentStatement("intTest = 2;"));
         assertTrue(validator.isValidAssignmentStatement("charTest = 'a';"));
@@ -89,6 +78,7 @@ class isValidAssignmentTests {
 
     @Test
     void testExistingVarAssignOperations() {
+        addVariables();
         assertTrue(validator.isValidAssignmentStatement("doubleTest = 234.0 + 10;"));
         assertTrue(validator.isValidAssignmentStatement("intTest = 2 + 5;"));
         assertTrue(validator.isValidAssignmentStatement("charTest = 'a' + 2;"));
@@ -101,4 +91,10 @@ class isValidAssignmentTests {
         assertFalse(validator.isValidAssignmentStatement("break = 222.0;"));
     }
 
+    void addVariables() {
+        validator.addVariable("doubleTest", DataType.DOUBLE);
+        validator.addVariable("intTest", DataType.INT);
+        validator.addVariable("charTest", DataType.CHAR);
+        validator.addVariable("boolTest", DataType.BOOLEAN);
+    }
 }

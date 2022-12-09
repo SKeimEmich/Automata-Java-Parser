@@ -11,23 +11,24 @@ class isValidMethodSigTests {
 
 
     @Test
-    void validMethodSig() {
+    void testValidMethodSig() {
         assertTrue(validator.isValidMethodSignature("public static void testMethod()"));
     }
 
     @Test
-    void mustReturnVoid() {
-        assertFalse(validator.isValidMethodSignature("public static int testMethod()"));
+    void testVoidReturnVoid() {
+        assertThrows(ParserException.class, () -> validator.isValidMethodSignature("public static int testMethod()"));
     }
 
     @Test
-    void spaceBetweenNameAndReturnType() {
-        assertFalse(validator.isValidMethodSignature("inttestMethod()"));
+    void testSpaceBetweenNameAndReturnType() {
+        assertThrows(ParserException.class, () -> validator.isValidMethodSignature("inttestMethod()"));
     }
 
     @Test
     void testForZeroMethodArgs() {
-        assertFalse(validator.isValidMethodSignature("void testMethod(int arg"));
+        assertThrows(ParserException.class, () -> validator.isValidMethodSignature("void testMethod(int arg"));
+
     }
 
     @Test
@@ -37,7 +38,7 @@ class isValidMethodSigTests {
     }
 
     @Test
-    void testForReservedKeywordName() {
+    void testForReservedKeyword() {
         assertThrows(ParserException.class, () -> validator.isValidMethodSignature("public static void enum()"));
     }
 
