@@ -130,8 +130,8 @@ public class Validator {
 
 	/**
 	 *author Jon
-	 * @param forLoop
-	 * @return true if forLoop contains a valid loop
+	 * @param forLoop, string to be parsed
+	 * @return true if forLoop contains a valid loop declaration, throw ParserException if not
 	 */
 	public boolean isValidFor(String forLoop) {
 
@@ -145,27 +145,28 @@ public class Validator {
 
 			//split by ';', then assign each to a string. append ';' to each since their respective parse methods require them
 			String [] forArray = forLoopCntrl.split(";");
-			String counterInit = forArray[0].trim() + ';';  //counter initialization, eg int i = 0
 
+			String counterInit = forArray[0].trim() + ';';  //counter initialization, eg int i = 0
 			String forCondition = forArray[1].trim();   //bool, ex: i < 10
 			String inlineOp = forArray[2].trim() + ';';  //operator, ex i++
 
-			//check if all three components of for loop parentheses are valid
+			//check if all three components of for loop declaration are valid, if not exception is thrown w/ message
 			if(!isValidAssignmentStatement(counterInit))
-				return false;
-			else if(!isValidBoolExpression(forCondition))
-				return false;
-			else if(isValidOperation(inlineOp))
-				return true;
+				throw new ParserException(String.format("%s : not a valid loop counter declaration/initialization", counterInit));
+			if(!isValidBoolExpression(forCondition))
+				throw new ParserException(String.format("%s : not a valid boolean loop control", forCondition));
+			 if(!isValidOperation(inlineOp))
+				throw new ParserException(String.format("%s : not a valid loop counter increment/decrement", inlineOp));
+			return true;
 		}
-		return false;
+		//thrown if string did not match for loop declaration structure at all
+		throw new ParserException(String.format("%s : not a valid for loop declaration", forLoop));
 	}
 
 	/**
-	 *
-	 * todo Jon needs to pass in other simple statement methods
 	 * @param simpleStatement
 	 * @return True if simple statement is valid
+	 * throws parserException if simple statement is not valid
 	 * Jon
 	 */
 	public boolean isValidSimpleStatement(String simpleStatement) {
@@ -173,7 +174,7 @@ public class Validator {
 		//checking if valid print statement
 		if (simpleStatement.matches("\\s*System\\.out\\.(println|printf|print)\\s*\\(\".+\"\\);")) {
 
-			//extract code between parentheses
+			//extract code between parentheses, will be 'printBlock'
 			int startIndex = simpleStatement.indexOf('(') + 1;
 			int endIndex = simpleStatement.indexOf(')');
 
@@ -183,43 +184,59 @@ public class Validator {
 			if (quoteMatcher.find()) {
 				return true;
 			}
+			else throw new ParserException(String.format("%s is not a valid print statement, missing ' \" ", simpleStatement));
 		}
 
-		//inline and block comments
-		if(simpleStatement.matches("//.*")){
+		//inline comment
+		if(simpleStatement.matches("^//.*$")){
 			return true;
 		}
 
-		if(simpleStatement.matches("/\\*.*\\*/")) {
+		//block comment
+		if(simpleStatement.matches("^/\\*.*\\*/$")) {
 			return true;
 		}
 
-		//check if statement is a valid assignment statement
-		if(isValidAssignmentStatement(simpleStatement))
-			return true;
+		//check if statement is a valid variable declaration
+		if(simpleStatement.matches("^\\s*(int|double|boolean|char)\\s+[A-z$_][A-z0-9$_]*;$")) {
+			if(!isValidVariableDeclaration(simpleStatement))
+				throw new ParserException(String.format("%s is not a valid variable declaration.", simpleStatement));
+			else return true;
+		}
+
+		//check if valid variable initialization/assignment
+		if(simpleStatement.matches("^[^=]+\\s*=[^=]+;$")) {
+			if(!isValidAssignmentStatement(simpleStatement))
+				throw new ParserException(String.format("%s is not a valid variable initialization/assignment", simpleStatement));
+			else return true;
+		}
 
 		//check if it's a valid operation
-		if(isValidOperation(simpleStatement))
-			return true;
+		if(simpleStatement.matches("^'?[\\x00-\\x7F]+'?\\s*[+\\-*/%]\\s*'?[\\x00-\\x7F]+'?;$")) {
+			if (!isValidOperation(simpleStatement))
+				throw new ParserException(String.format("%s is not a valid operation", simpleStatement));
+			else return true;
+		}
 
-		//if no true conditions met
-		return false;
+		//check if valid inline operation
+		if(simpleStatement.matches("\\s*[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--);$")) {
+			if (!isValidOperation(simpleStatement))
+				throw new ParserException(String.format("%s is not a valid inline operation", simpleStatement));
+			else return true;
+		}
+
+		throw new ParserException(String.format("%s is not a valid simple statement", simpleStatement));
 	}
 
-	/*
-	* @param string to be checked for assignment statement
-	* @return true if a valid assignment statement
-	 */
-	public boolean isValidAssignmentStatement(String assignmentStatement) {
-
+	public boolean isValidVariableDeclaration(String varDeclaration) {
 		//initialize data type for adding to declaredVariables map
 		DataType type = null;
 
 		//if statement is a simple declaration return true, add variable and its type to map
-		if (assignmentStatement.matches("^\\s*(int|double|boolean|char)\\s+[A-z$_][A-z0-9$_]*;$")) {
+		if (varDeclaration.matches("^\\s*(int|double|boolean|char)\\s+[A-z$_][A-z0-9$_]*;$")) {
 
 			//split declaration statement into type and var name, excluding semicolon
-			String [] statementTokens = assignmentStatement.split(" ");
+			String [] statementTokens = varDeclaration.split(" ");
 			String newVarType = statementTokens[0].trim();
 			String newVar = statementTokens[1].trim().substring(0, statementTokens[1].indexOf(';'));
 
@@ -230,18 +247,20 @@ public class Validator {
 				case "boolean" -> type = DataType.BOOLEAN;
 				case "char" -> type = DataType.CHAR;
 			}
-
 			//add variable to map, if successful return true
 			if(addVariable(newVar, type))
 				return true;
-
-			return false;
 		}
-
+		return false;
+	}
+	/*
+	* @param string to be checked for assignment statement
+	* @return true if a valid assignment statement
+	 */
+	public boolean isValidAssignmentStatement(String assignmentStatement) {
 		//parsing for assignment, if an '=' is present in the string
-		Matcher assignmentMatcher = Pattern.compile("^[^=]+\\s*=[^=]+;$").matcher(assignmentStatement);
 
-		if (assignmentMatcher.find()) {
+		if(assignmentStatement.matches("^[^=]+\\s*=[^=]+;$")){
 
 			//split by '=' into left and right sides of string, trim to remove any leading/trailing whitespace
 			String[] arr = assignmentStatement.split("=");
@@ -359,7 +378,7 @@ public class Validator {
 			}
 			else return true;
 		}
-		return false;
+		throw new ParserException(String.format("%s is not a valid method declaration", methodSignature));
 	}
 
 	/**
