@@ -17,8 +17,6 @@ import java.util.regex.Pattern;
 
 import exceptions.ParserException;
 
-import javax.swing.text.html.parser.Parser;
-
 public class Validator {
 	private String code; // Shouldn't be touched outside of this class
 	private ArrayList<String> reservedKeywords;

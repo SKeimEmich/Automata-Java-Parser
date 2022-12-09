@@ -55,7 +55,6 @@ class isValidSimpleStatementTests {
     @Test
     //test case when ending block symbol is missing
     void inValidBlockCommentTest() {
-        //assertFalse(validator.isValidSimpleStatement("/*asdflajsdfkl"));
         assertThrows(ParserException.class, () -> validator.isValidSimpleStatement("/*asdflajsdfkl"));
     }
 
