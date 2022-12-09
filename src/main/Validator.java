@@ -385,7 +385,7 @@ public class Validator {
 		// Author Sam
 
 		// Check if the IF statement does not match the pattern "if() "
-		if (!ifBlock.matches("\\A\\s*if\\s?\\(.+\\).*")) {
+		if (!ifBlock.matches("\\A\\s*if\\s?\\([\\s\\S]+\\)[\\s\\S]*")) {
 			throw new ParserException(String.format("Invalid if statement: \"%s\".", ifBlock));
 		}
 
@@ -645,11 +645,11 @@ public class Validator {
 		// construct matchers to match a complex statement ...
 		// ... with a code block
 		Matcher withSimpleStatementMatcher = Pattern
-				.compile("\\A(\\s*(while|switch|if|for)\\s*(\\(.+\\))\\s*(.+;)|\\s*do\\s*(.+;)\\s*while\\s*\\(.+\\);)")
+				.compile("\\A(\\s*(while|switch|if|for)\\s*(\\([\\s\\S]+\\))\\s*([\\s\\S]+)|\\s*do\\s*([\\s\\S]+;)\\s*while\\s*\\([\\s\\S]+\\);)")
 				.matcher(codeBlock);
 		// .. with a simple statement
 		Matcher withCodeBlockMatcher = Pattern
-				.compile("\\A(\\s*(while|switch|if|for)\\s*(\\(.+\\))\\s*(\\{.+\\})|\\s*do\\s*(\\{.+\\})\\s*while\\s*\\(.+\\);)")
+				.compile("\\A(\\s*(while|switch|if|for)\\s*(\\([\\s\\S]+\\))\\s*(\\{[\\s\\S]+\\})|\\s*do\\s*(\\{[\\s\\S]+\\})\\s*while\\s*\\([\\s\\S]+\\);)")
 				.matcher(codeBlock);
 
 		// Check if either matcher found a pattern match, if not, the next line is a simple statement
@@ -660,38 +660,60 @@ public class Validator {
 				throw new ParserException("I don't know how you got here, so congratulations on that.");
 			}
 			remainingCodeBlock = codeBlock.substring(codeBlock.indexOf(';') + 1);
-		} else if(withSimpleStatementMatcher.find()) { // check if we have a complex statement containing a simple statement
-			System.out.println(664);
-			// We found a match to a reserved keyword for a complex statement that we can process
-			// get end of statement
+		} 
+		
+		// reset matchers to check from the beginning of the string
+		withCodeBlockMatcher.reset();
+		withSimpleStatementMatcher.reset();
+
+		if(withSimpleStatementMatcher.find()) { // check if we have a simple statement containing a simple statement
 			// find ; at end of simple statement contained in this complex statement
-			// if it is a do-while, get the while at the end
-			// get substring
-			// pass to isComplexStatement
-			// construct remainingCodeBlock
+			int endOfStatement = codeBlock.indexOf(';');
+			String statementToCheck = codeBlock.substring(0, endOfStatement + 1);
 			
-		} else if (withCodeBlockMatcher.find()) { // check if we have a complex statement containing a code block
+			// pass to isValidComplexStatement
+			if (!isValidComplexStatement(statementToCheck)) {
+				throw new ParserException("I don't know how you got here, so congratulations on that.");
+			}
+
+			// construct remaining code block
+			remainingCodeBlock = codeBlock.substring(endOfStatement + 1);
+		}
+
+		// reset matchers to check from the beginning of the string
+		withCodeBlockMatcher.reset();
+		withSimpleStatementMatcher.reset();
+		
+		if (withCodeBlockMatcher.find()) { // check if we have a complex statement containing a code block
 			// We found a match to a reserved keyword for a complex statement that we can process
 			// get end of statement
 			// find closing curlybrace
-			System.out.println("667");
-			System.out.println(codeBlock.substring(codeBlock.indexOf('{')));
-			int indexOfClosingBrace = getPositionOfClosingBrace(codeBlock.substring(codeBlock.indexOf('{')));
+			int indexOfOpeningBrace = codeBlock.indexOf('{');
+			int endOfStatement = getPositionOfClosingBrace(codeBlock.substring(codeBlock.indexOf('{'))) + indexOfOpeningBrace;
 			// if it is a do-while, get the while at the end
-			
+			if(codeBlock.startsWith("do")) {
+				// starting at the index of the closing curly brace
+				// search for the next ;
+				// update closing index to this index
+				endOfStatement = codeBlock.indexOf(';', endOfStatement);
+			}
 			// get substring
+			String statementToCheck = codeBlock.substring(0, endOfStatement + 1);
 			
 			// pass to isComplexStatement
+			if (!isValidComplexStatement(statementToCheck)) {
+				throw new ParserException("I don't know how you got here, so congratulations on that.");
+			}
 			
 			// construct remainingCodeBlock
+			remainingCodeBlock = codeBlock.substring(endOfStatement + 1);
 		}
 
-		
-		return true;
-//		return true && isValidCodeBlock(remainingCodeBlock);
+		// recurse with remaining code block
+		return true && isValidCodeBlock(remainingCodeBlock);
 	}
 
-	public boolean isComplexStatement(String statement) {
+	public boolean isValidComplexStatement(String statement) {
 		return true;
 	}
 

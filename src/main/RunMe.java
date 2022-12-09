@@ -16,10 +16,10 @@ public class RunMe {
 
 		Validator validator = new Validator("Code.txt");
 		validator.validate();
-//		if(validator.isValid()) {
-//			// Print result
-//			System.out.println("The code provided in this file is valid.\nThank you for using our parser.");
-//		}
+		if(validator.isValid()) {
+			// Print result
+			System.out.println("The code provided in this file is valid.\nThank you for using our parser.");
+		}
 	}
 
 }

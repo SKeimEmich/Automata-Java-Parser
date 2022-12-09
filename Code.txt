@@ -1,5 +1,5 @@
 public static void main(){
-if(true) {i = 2;}
+if(true) int j;
 int i;
 i = 2;
 boolean y = i > 3;
