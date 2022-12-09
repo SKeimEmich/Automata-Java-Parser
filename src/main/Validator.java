@@ -410,7 +410,9 @@ public class Validator {
 		if (remainingIf.charAt(0) == '{') {
 			int indexOfClosingBrace = getPositionOfClosingBrace(remainingIf);
 			if (indexOfClosingBrace > 0) {
-				String codeBlock = remainingIf.substring(0, indexOfClosingBrace + 1);
+				String codeBlock = remainingIf.substring(1, indexOfClosingBrace - 1).trim();
+//				String codeBlock = remainingIf.substring(0, indexOfClosingBrace + 1).trim();
+				// TODO THIS LINE IS HTE ONE YOU CHANGED
 				if (!isValidCodeBlock(codeBlock)) {
 					throw new ParserException("I don't know how you got here, so congratulations on that.");
 				}
@@ -641,49 +643,16 @@ public class Validator {
 			return true;
 		}
 		
-		// check if beginning of string is statement keyword
-		// construct matchers to match a complex statement ...
+		// Construct matchers to check if is a complex statement...
+		// ... with a simple statement
+		Matcher withSimpleMatcher = Pattern
+				.compile("\\A(\\s*(while|switch|if|for)\\s*\\([\\w\\s\\=\\;\\>\\<\\+\\-\\$]*\\)|\\s*do\\s*)")
+				.matcher(codeBlock);
 		// ... with a code block
-		Matcher withSimpleStatementMatcher = Pattern
-				.compile("\\A(\\s*(while|switch|if|for)\\s*(\\([\\s\\S]+\\))\\s*([\\s\\S]+)|\\s*do\\s*([\\s\\S]+;)\\s*while\\s*\\([\\s\\S]+\\);)")
-				.matcher(codeBlock);
-		// .. with a simple statement
 		Matcher withCodeBlockMatcher = Pattern
-				.compile("\\A(\\s*(while|switch|if|for)\\s*(\\([\\s\\S]+\\))\\s*(\\{[\\s\\S]+\\})|\\s*do\\s*(\\{[\\s\\S]+\\})\\s*while\\s*\\([\\s\\S]+\\);)")
+				.compile("\\A(\\s*(while|switch|if|for)\\s*\\([\\w\\s\\=\\;\\>\\<\\+\\-\\$]*\\)\\s*\\{|\\s*do\\s*\\{)")
 				.matcher(codeBlock);
 
-		// Check if either matcher found a pattern match, if not, the next line is a simple statement
-		if (!(withCodeBlockMatcher.find() || withSimpleStatementMatcher.find())) {
-			// The next part of the codeblock to process is not a complex statement, it is a simple statement
-			String simpleStatement = codeBlock.substring(0, codeBlock.indexOf(';') + 1);
-			if (!isValidSimpleStatement(simpleStatement)) {
-				throw new ParserException("I don't know how you got here, so congratulations on that.");
-			}
-			remainingCodeBlock = codeBlock.substring(codeBlock.indexOf(';') + 1);
-		} 
-		
-		// reset matchers to check from the beginning of the string
-		withCodeBlockMatcher.reset();
-		withSimpleStatementMatcher.reset();
-
-		if(withSimpleStatementMatcher.find()) { // check if we have a simple statement containing a simple statement
-			// find ; at end of simple statement contained in this complex statement
-			int endOfStatement = codeBlock.indexOf(';');
-			String statementToCheck = codeBlock.substring(0, endOfStatement + 1);
-			
-			// pass to isValidComplexStatement
-			if (!isValidComplexStatement(statementToCheck)) {
-				throw new ParserException("I don't know how you got here, so congratulations on that.");
-			}
-
-			// construct remaining code block
-			remainingCodeBlock = codeBlock.substring(endOfStatement + 1);
-		}
-
-		// reset matchers to check from the beginning of the string
-		withCodeBlockMatcher.reset();
-		withSimpleStatementMatcher.reset();
-		
 		if (withCodeBlockMatcher.find()) { // check if we have a complex statement containing a code block
 			// We found a match to a reserved keyword for a complex statement that we can process
 			// get end of statement
@@ -699,7 +668,6 @@ public class Validator {
 			}
 			// get substring
 			String statementToCheck = codeBlock.substring(0, endOfStatement + 1);
-			
 			// pass to isComplexStatement
 			if (!isValidComplexStatement(statementToCheck)) {
 				throw new ParserException("I don't know how you got here, so congratulations on that.");
@@ -707,14 +675,46 @@ public class Validator {
 			
 			// construct remainingCodeBlock
 			remainingCodeBlock = codeBlock.substring(endOfStatement + 1);
-		}
+		} else if(withSimpleMatcher.find()) { // we have a complex statement containing a simple statement
+			// find ; at end of simple statement contained in this complex statement
+			int endOfStatement = codeBlock.indexOf(';');
+			String statementToCheck = codeBlock.substring(0, endOfStatement + 1);
+			
+			// pass to isValidComplexStatement
+			if (!isValidComplexStatement(statementToCheck)) {
+				throw new ParserException("I don't know how you got here, so congratulations on that.");
+			}
+			// construct remaining code block
+			remainingCodeBlock = codeBlock.substring(endOfStatement + 1);
+		} else {
+			// The next part of the codeblock to process is not a complex statement, assume it is a simple statement
+			String statementToCheck = codeBlock.substring(0, codeBlock.indexOf(';') + 1);
+						
+			if (!isValidSimpleStatement(statementToCheck)) {
+				throw new ParserException("I don't know how you got here, so congratulations on that.");
+			}
+			remainingCodeBlock = codeBlock.substring(codeBlock.indexOf(';') + 1);
+		} 
+		
 
 		// recurse with remaining code block
 		return true && isValidCodeBlock(remainingCodeBlock);
 	}
 
 	public boolean isValidComplexStatement(String statement) {
-		return true;
+		// do while switch if for
+		if(statement.startsWith("do")) {
+			// TODO Update this later when method is available
+		} else if (statement.startsWith("while")){
+			return isValidWhile(statement);
+		} else if (statement.startsWith("switch")){
+			return isValidSwitch(statement);
+		} else if (statement.startsWith("if")){
+			return isValidIf(statement);
+		} else if (statement.startsWith("for")){
+			return isValidFor(statement);
+		} 
+		throw new ParserException("Invalid complex statement, error unknown.");
 	}
 
 }
