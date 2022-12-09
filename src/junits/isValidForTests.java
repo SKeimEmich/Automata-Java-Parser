@@ -34,6 +34,8 @@ class isValidForTests {
         assertThrows(ParserException.class, () -> validator.isValidFor("for(int j = 0; j <10; j+){"));
         assertThrows(ParserException.class, () -> validator.isValidFor("for(j = 0; j <10; j-){"));
         assertThrows(ParserException.class, () -> validator.isValidFor("for(j = 0; j <10; j){"));
+        assertThrows(ParserException.class, () -> validator.isValidFor("for(j = 0; j <10; j++++){"));
+        assertThrows(ParserException.class, () -> validator.isValidFor("for(j = 0; j <10; j-------){"));
     }
 
     @Test
