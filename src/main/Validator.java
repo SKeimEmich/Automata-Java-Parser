@@ -66,7 +66,7 @@ public class Validator {
 	private ArrayList<String> getReservedKeywords() {
 		Scanner s = null;
 		try {
-			s = new Scanner(new File("./Automata-Java-Parser/ReservedKeywords.txt"));
+			s = new Scanner(new File("ReservedKeywords.txt"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
