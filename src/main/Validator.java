@@ -758,7 +758,7 @@ public class Validator {
 	public boolean isValidComplexStatement(String statement) {
 		// do while switch if for
 		if(statement.startsWith("do")) {
-			// TODO Update this later when method is available
+			return isValidDoWhile(statement);
 		} else if (statement.startsWith("while")){
 			return isValidWhile(statement);
 		} else if (statement.startsWith("switch")){
