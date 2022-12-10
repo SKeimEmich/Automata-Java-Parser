@@ -720,17 +720,16 @@ public class Validator {
 			// construct remaining code block
 			remainingCodeBlock = codeBlock.substring(endOfStatement + 1);
 		} else {
-
 			// The next part of the codeblock to process is not a complex statement, assume it is a simple statement
-			if(codeBlock.substring(0,2).equals("/*")) {
+			if(codeBlock.substring(0,2).equals("/*")) { // Check if it's a block comment
 				statementToCheck = codeBlock.substring(0, codeBlock.indexOf("*/") + 2);
 				remainingCodeBlock = codeBlock.substring(codeBlock.indexOf("*/") + 2);
 			}
-			else if (codeBlock.charAt(0) == '/') {
+			else if (codeBlock.charAt(0) == '/') { // Check if it's an inline comment
 				statementToCheck = codeBlock.substring(0, codeBlock.indexOf('\n'));
 				remainingCodeBlock = codeBlock.substring(codeBlock.indexOf('\n') + 1);
 			}
-			else {
+			else { // It's not a block or an inline comment, cut out the simple statement and parse
 				statementToCheck = codeBlock.substring(0, codeBlock.indexOf(';') + 1).trim();
 				remainingCodeBlock = codeBlock.substring(codeBlock.indexOf(';') + 1);
 			}
@@ -738,7 +737,6 @@ public class Validator {
 			if (!isValidSimpleStatement(statementToCheck)) {
 				throw new ParserException("I don't know how you got here, so congratulations on that.");
 			}
-			//remainingCodeBlock = codeBlock.substring(codeBlock.indexOf(';') + 1);
 		}
 
 		// recurse with remaining code block
