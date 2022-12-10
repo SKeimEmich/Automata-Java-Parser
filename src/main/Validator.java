@@ -208,12 +208,12 @@ public class Validator {
 			else throw new ParserException(String.format("%s is not a valid print statement, missing ' \" ", simpleStatement));
 		}
 
-		//inline comment - need to figure out parsing without using ; as delimiter
+		//inline comment
 		if(simpleStatement.matches("\\s*//.*")){
 			return true;
 		}
 
-		//block comment - need to figure out parsing wihtout using ';' as delimiter
+		//block comment
 		if(simpleStatement.matches("\\s*/[*](.|\n)*[*]/")) {
 			return true;
 		}
@@ -236,13 +236,6 @@ public class Validator {
 		if(simpleStatement.matches("\\s*[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--);$")) {
 			if (!isValidOperation(simpleStatement))
 				throw new ParserException(String.format("%s is not a valid inline operation", simpleStatement));
-			else return true;
-		}
-
-		//check if it's a valid operation
-		if(simpleStatement.matches("^'?[\\x00-\\x7F]+'?\\s*[+\\-*/%]\\s*'?[\\x00-\\x7F]+'?;$")) {
-			if (!isValidOperation(simpleStatement))
-				throw new ParserException(String.format("%s is not a valid operation", simpleStatement));
 			else return true;
 		}
 
@@ -677,7 +670,7 @@ public class Validator {
 		codeBlock = codeBlock.trim(); // white space removal
 		String remainingCodeBlock = ""; // setup var for remaining code to process
 		String statementToCheck = "";
-		
+
 		// BASE CASE
 		if(codeBlock.isBlank()) {
 			return true;
@@ -746,7 +739,7 @@ public class Validator {
 				throw new ParserException("I don't know how you got here, so congratulations on that.");
 			}
 			//remainingCodeBlock = codeBlock.substring(codeBlock.indexOf(';') + 1);
-		} 
+		}
 
 		// recurse with remaining code block
 		return true && isValidCodeBlock(remainingCodeBlock);
