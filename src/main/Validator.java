@@ -654,10 +654,22 @@ public class Validator {
 	 */
 	public boolean isValidWhile(String whileLoop) {
 		// Check that block is a valid block
-		// Check that statement at end of block contains a valid boolean expression
+		// Check that statement at beginning of block contains a valid boolean expression
 		return true;
 	}
 
+	/**
+	 * Returns true if the string passed is a valid Do-While Loop TODO Katie
+	 * 
+	 * @param doWhileLoop
+	 * @return True if do-while loop is valid
+	 */
+	public boolean isValidDoWhile(String doWhileLoop) {
+		// Check that block is a valid block
+		// Check that statement at end of block contains a valid boolean expression
+		return true;
+	}
+	
 	/*
 	 * Returns true if the string passed is a valid code block.
 	 *
