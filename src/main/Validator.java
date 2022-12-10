@@ -370,22 +370,22 @@ public class Validator {
 	 * tests for valid operation, allows for +, -, *, /, % allows for character
 	 * arithmetic as well as combining number/char
 	 */
-	public boolean isValidOperation(String operation) {
 
-		//checks for valid operation, allows character operations as well
-		Matcher OpMatcher = Pattern.compile("^'?[\\x00-\\x7F]+'?\\s*[+\\-*/%]\\s*'?[\\x00-\\x7F]+'?;$")
-				.matcher(operation);
-		if (OpMatcher.find())
-			return true;
+		public boolean isValidOperation(String operation) {
 
-		// check if inline operation, eg 'i++'
-		if (operation.matches("\\s*[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--);"))
-			return true;
+			//checks for valid character operation
+			Matcher operationPattern = Pattern.compile("'?[\\x00-\\x7F]+'?\\s*[+\\-*/%]\\s*'?[\\x00-\\x7F]+'?;")
+					.matcher(operation);
+			Matcher multipleOperators = Pattern.compile("[+\\-*/%][+\\-*/%]+").matcher(operation);
 
-		// false if invalid operation
-		return false;
+			if (operationPattern.find() && !multipleOperators.find())
+				return true;
 
-	}
+			// check if inline operation, eg 'i++'
+			return operation.matches("\\s*[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--);");
+
+		}
+
 
 	/**
 	 * Todo: Jon Returns true if the string passed is a valid method signature

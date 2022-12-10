@@ -1,7 +1,7 @@
 public static void main(){
 int j;
 int i;
-for(i = 1; i > 6; i++){
+for(i = 1; i > 6; i--){
 	j++;
 	boolean k = true;
 	int a;
