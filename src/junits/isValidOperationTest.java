@@ -41,7 +41,7 @@ class isValidOperationTest {
         assertFalse(validator.isValidOperation("testValue-;"));
         assertFalse(validator.isValidOperation("testValue+;"));
         assertFalse(validator.isValidOperation("testValue;"));
-       // assertFalse(validator.isValidOperation("testValue++++++;"));
+        assertFalse(validator.isValidOperation("testValue++++++;"));
         assertFalse(validator.isValidOperation("testValue--------;"));
     }
 

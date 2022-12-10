@@ -49,7 +49,7 @@ class isValidSimpleStatementTests {
 
     @Test
     void isValidBlockComment() {
-        assertTrue(validator.isValidSimpleStatement("/*block comment test! */"));
+        assertTrue(validator.isValidSimpleStatement("/*block \n comment test!\n */"));
     }
 
     @Test

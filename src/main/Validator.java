@@ -208,13 +208,13 @@ public class Validator {
 			else throw new ParserException(String.format("%s is not a valid print statement, missing ' \" ", simpleStatement));
 		}
 
-		//inline comment
-		if(simpleStatement.matches("^//.*$")){
+		//inline comment - need to figure out parsing without using ; as delimiter
+		if(simpleStatement.matches("\\s*//.*")){
 			return true;
 		}
 
-		//block comment
-		if(simpleStatement.matches("^/\\*.*\\*/$")) {
+		//block comment - need to figure out parsing wihtout using ';' as delimiter
+		if(simpleStatement.matches("\\s*/[*](.|\n)*[*]/")) {
 			return true;
 		}
 
@@ -232,17 +232,17 @@ public class Validator {
 			else return true;
 		}
 
-		//check if it's a valid operation
-		if(simpleStatement.matches("^'?[\\x00-\\x7F]+'?\\s*[+\\-*/%]\\s*'?[\\x00-\\x7F]+'?;$")) {
-			if (!isValidOperation(simpleStatement))
-				throw new ParserException(String.format("%s is not a valid operation", simpleStatement));
-			else return true;
-		}
-
 		//check if valid inline operation
 		if(simpleStatement.matches("\\s*[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--);$")) {
 			if (!isValidOperation(simpleStatement))
 				throw new ParserException(String.format("%s is not a valid inline operation", simpleStatement));
+			else return true;
+		}
+
+		//check if it's a valid operation
+		if(simpleStatement.matches("^'?[\\x00-\\x7F]+'?\\s*[+\\-*/%]\\s*'?[\\x00-\\x7F]+'?;$")) {
+			if (!isValidOperation(simpleStatement))
+				throw new ParserException(String.format("%s is not a valid operation", simpleStatement));
 			else return true;
 		}
 
@@ -372,18 +372,19 @@ public class Validator {
 	 */
 	public boolean isValidOperation(String operation) {
 
-		//checks for valid operation, allows character operations as well
-		Matcher OpMatcher = Pattern.compile("^'?[\\x00-\\x7F]+'?\\s*[+\\-*/%]\\s*'?[\\x00-\\x7F]+'?;$")
+		//checks for valid character operation
+		Matcher operationPattern = Pattern.compile("'?[\\x00-\\x7F]+'?\\s*[+\\-*/%]\\s*'?[\\x00-\\x7F]+'?;")
 				.matcher(operation);
-		if (OpMatcher.find())
+		Matcher multipleOperators = Pattern.compile("[+\\-*/%][+\\-*/%]+").matcher(operation);
+
+		if (operationPattern.find() && !multipleOperators.find())
 			return true;
 
 		// check if inline operation, eg 'i++'
-		if (operation.matches("\\s*[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--);"))
-			return true;
+		return operation.matches("\\s*[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--);");
+
 
 		// false if invalid operation
-		return false;
 
 	}
 
@@ -675,6 +676,7 @@ public class Validator {
 		// Author Sam
 		codeBlock = codeBlock.trim(); // white space removal
 		String remainingCodeBlock = ""; // setup var for remaining code to process
+		String statementToCheck = "";
 		
 		// BASE CASE
 		if(codeBlock.isBlank()) {
@@ -705,7 +707,7 @@ public class Validator {
 				endOfStatement = codeBlock.indexOf(';', endOfStatement);
 			}
 			// get substring
-			String statementToCheck = codeBlock.substring(0, endOfStatement + 1);
+			statementToCheck = codeBlock.substring(0, endOfStatement + 1);
 			// pass to isComplexStatement
 			if (!isValidComplexStatement(statementToCheck)) {
 				throw new ParserException("I don't know how you got here, so congratulations on that.");
@@ -716,7 +718,7 @@ public class Validator {
 		} else if(withSimpleMatcher.find()) { // we have a complex statement containing a simple statement
 			// find ; at end of simple statement contained in this complex statement
 			int endOfStatement = codeBlock.indexOf(';');
-			String statementToCheck = codeBlock.substring(0, endOfStatement + 1);
+			 statementToCheck = codeBlock.substring(0, endOfStatement + 1);
 			
 			// pass to isValidComplexStatement
 			if (!isValidComplexStatement(statementToCheck)) {
@@ -725,15 +727,26 @@ public class Validator {
 			// construct remaining code block
 			remainingCodeBlock = codeBlock.substring(endOfStatement + 1);
 		} else {
+
 			// The next part of the codeblock to process is not a complex statement, assume it is a simple statement
-			String statementToCheck = codeBlock.substring(0, codeBlock.indexOf(';') + 1);
+			if(codeBlock.substring(0,2).equals("/*")) {
+				statementToCheck = codeBlock.substring(0, codeBlock.indexOf("*/") + 2);
+				remainingCodeBlock = codeBlock.substring(codeBlock.indexOf("*/") + 2);
+			}
+			else if (codeBlock.charAt(0) == '/') {
+				statementToCheck = codeBlock.substring(0, codeBlock.indexOf('\n'));
+				remainingCodeBlock = codeBlock.substring(codeBlock.indexOf('\n') + 1);
+			}
+			else {
+				statementToCheck = codeBlock.substring(0, codeBlock.indexOf(';') + 1).trim();
+				remainingCodeBlock = codeBlock.substring(codeBlock.indexOf(';') + 1);
+			}
 						
 			if (!isValidSimpleStatement(statementToCheck)) {
 				throw new ParserException("I don't know how you got here, so congratulations on that.");
 			}
-			remainingCodeBlock = codeBlock.substring(codeBlock.indexOf(';') + 1);
+			//remainingCodeBlock = codeBlock.substring(codeBlock.indexOf(';') + 1);
 		} 
-		
 
 		// recurse with remaining code block
 		return true && isValidCodeBlock(remainingCodeBlock);
