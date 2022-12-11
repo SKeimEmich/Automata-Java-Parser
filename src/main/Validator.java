@@ -297,25 +297,34 @@ public class Validator {
 					DataType varType = null;
 					switch (varParams[0]) {
 					case "boolean":
-						if (isValidBoolExpression(rightOfEquals.substring(0, rightOfEquals.length() - 1)))
+						if (isValidBoolExpression(rightOfEquals.substring(0, rightOfEquals.length() - 1))) {
 							varType = DataType.BOOLEAN;
-						break;
+							break;
+						}
+						else return false;
 
 					case "char":
-						if (rightOfEquals.matches("^'[\\x00-\\x7F]';$") | isValidOperation(rightOfEquals))
+						if (rightOfEquals.matches("^'[\\x00-\\x7F]';$") | isValidOperation(rightOfEquals)) {
 							varType = DataType.CHAR;
-						break;
+							break;
+						}
+						else return false;
 
 					case "int":
-						if (rightOfEquals.matches("^[0-9]+;$") | isValidOperation(rightOfEquals))
+						if (rightOfEquals.matches("^[0-9]+;$") | isValidOperation(rightOfEquals)) {
 							varType = DataType.INT;
-						break;
+							break;
+						}
+						else return false;
 
 					case "double":
-						if (rightOfEquals.matches("^([0-9]+\\.[0-9]+|[0-9]+);$") | isValidOperation(rightOfEquals))
+						if (rightOfEquals.matches("^([0-9]+\\.[0-9]+|[0-9]+);$") | isValidOperation(rightOfEquals)) {
 							varType = DataType.DOUBLE;
-						break;
+							break;
+						}
+						else return false;
 					}
+					//variable added to map if it was valid assignment
 					addVariable(varParams[1], varType);
 					return true;
 				}
@@ -365,20 +374,36 @@ public class Validator {
 	 */
 	public boolean isValidOperation(String operation) {
 
-		//checks for valid character operation
-		Matcher operationPattern = Pattern.compile("'?[\\x00-\\x7F]+'?\\s*[+\\-*/%]\\s*'?[\\x00-\\x7F]+'?;")
-				.matcher(operation);
-		Matcher multipleOperators = Pattern.compile("[+\\-*/%][+\\-*/%]+").matcher(operation);
+		String process = " ";
+		if (operation.matches("^\\s*('\\w'|\\d+|\\w+)\\s*[+%/*-]\\s*('\\w'" +
+				"|\\d+|\\w+)\\s*([+%/*-]\\s*('\\w'|\\d+|\\w+)\\s*)*;$")) {
 
-		if (operationPattern.find() && !multipleOperators.find())
+			String[] opArray = operation.split("[+%/*;-]");
+
+			for (String s : opArray) {
+				process = s.trim();
+				if (declaredVariables.containsKey(process) && getType(process) == DataType.BOOLEAN) {
+					throw new ParserException(String.format("%s is a boolean variable, not valid operation!", process));
+				}
+
+				if ((process.matches("[^0-9]+")) && !declaredVariables.containsKey(process)) {
+					if (!process.matches("'[^0-9]+'"))
+						throw new ParserException(String.format("%s is not a valid declared variable!", process));
+				}
+			}
 			return true;
+		}
 
-		// check if inline operation, eg 'i++'
-		return operation.matches("\\s*[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--);");
+		// check if inline operation, eg 'i++;'
+		if (operation.matches("\\s*[A-z$_][A-z0-9$_]*\\s*(\\+\\+|--);")) {
 
+			String varCheck = operation.substring(0, operation.length() - 3).trim();
+			if(declaredVariables.containsKey(varCheck) && getType(varCheck) == DataType.INT)
+				return true;
 
-		// false if invalid operation
-
+			else throw new ParserException(String.format("%s is not a valid post increment or decrement!", operation));
+		}
+		return false;
 	}
 
 	/**
