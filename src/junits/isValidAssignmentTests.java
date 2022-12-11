@@ -29,7 +29,7 @@ class isValidAssignmentTests {
 
     @Test
     void testValidCharAssignment() {
-        assertTrue(validator.isValidAssignmentStatement("char a = 'a';"));
+        assertFalse(validator.isValidAssignmentStatement("char a = 'a;"));
         assertTrue(validator.isValidAssignmentStatement("char b = 2 + 3;"));
     }
 

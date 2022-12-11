@@ -14,8 +14,9 @@ for(i = 1; i > 6; i++) {
 	i++; //why are we incrementing this here
 	     //that makes no sense lol
 
-	j = 2 * 3; /*can start block here
+	j = 5 * 3 + 2 % 2 - 2 + 'b' * char1; /*can start block here
 	            if you want*/
+
 
 	//a print statement for flair
 	System.out.println("hello there");

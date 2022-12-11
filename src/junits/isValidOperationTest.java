@@ -1,4 +1,6 @@
 package junits;
+import exceptions.ParserException;
+import main.DataType;
 import main.Validator;
 import org.junit.jupiter.api.Test;
 
@@ -13,15 +15,25 @@ class isValidOperationTest {
         assertTrue(validator.isValidOperation("2 -2;"));
         assertTrue(validator.isValidOperation("2 / 2;"));
         assertTrue(validator.isValidOperation("2 %2;"));
-        assertTrue(validator.isValidOperation("2 + 2;"));
         assertTrue(validator.isValidOperation("2 * 2;"));
+    }
+
+    @Test
+    void testValidOperationsWithVar() {
+        validator.addVariable("testVar", DataType.INT);
+        assertTrue(validator.isValidOperation("testVar + 2;"));
+    }
+
+    @Test
+    void testInvalidBooleanOperation() {
+        validator.addVariable("testVar", DataType.BOOLEAN);
+        assertThrows(ParserException.class, () -> validator.isValidOperation("testVar + 2;"));
     }
 
     @Test
     void testValidCharOp() {
         assertTrue(validator.isValidOperation("'3' + 'b';"));
         assertTrue(validator.isValidOperation("'3'+'b';"));
-        assertTrue(validator.isValidOperation("'=' + 'k';"));
     }
 
     @Test
@@ -31,9 +43,15 @@ class isValidOperationTest {
 
     @Test
     void validInlineOps() {
-        //validator.declaredVariables.put("testValue", DataType.INT);
+        validator.addVariable("testValue", DataType.INT);
         assertTrue(validator.isValidOperation("testValue++;"));
         assertTrue(validator.isValidOperation("testValue--;"));
+    }
+
+    @Test
+    void testMultipleOperations() {
+        validator.addVariable("test", DataType.INT);
+        assertTrue(validator.isValidOperation("3 + 3 - 2 + test;"));
     }
 
     @Test
