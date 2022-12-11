@@ -668,12 +668,20 @@ public class Validator {
 	 */
 	public boolean isValidSwitch(String switchBlock) {
 		// Check types in block, do they all match?
+
 		if (switchBlock.matches("\\A\\s*switch\\?\\(.+\\).*:")) {
 			
 		}
 		
 		
 		// is the syntax correct?
+
+		// is the syntax correct?*if\\s?\\(.+\\).*"))
+		if (!switchBlock.matches("\\A\\s*switch\\s?\\(.Variable\\).\\{.[case DataType\\:.\\s?[Statement]] [default:]?}")) {
+			throw new ParserException(String.format("Invalid switch statement: \"%s\".", switchBlock));
+		}
+		//switch (Variable) {[case DataType: [Statement]] [default:]?}
+
 		return true;
 	}
 
@@ -687,8 +695,8 @@ public class Validator {
 		// Author Katie 
 		// Check that block is a valid block
 
-		// Check that statement at beginning of block contains a valid boolean expression
 
+		// Check that statement at beginning of block contains a valid boolean expression
 		if (whileLoop.matches("\\A\\s*while\\s?\\(.+\\).*")) {
 			// inc first index, exc last index
 			// Check if it contains a valid boolean expression
@@ -701,6 +709,10 @@ public class Validator {
 				return true;
 			}
 		}
+
+		//if (!whileLoop.matches(""))
+		// Check that statement at end of block contains a valid boolean expression
+
 		return true;
 	}
 	
