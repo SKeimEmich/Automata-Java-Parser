@@ -162,7 +162,7 @@ public class Validator {
 			 /*code below, up to 'return true' comes from sam's ifBlock method, with renaming of variables for this method*/
 			// remove for(....) from forLoop
 			String remainingFor = forLoop.substring(forLoop.indexOf(')') + 1).trim();
-
+			System.out.println(remainingFor);
 			// Get block of code if it exists
 			if (remainingFor.charAt(0) == '{') {
 				int indexOfClosingBrace = getPositionOfClosingBrace(remainingFor);
@@ -242,6 +242,10 @@ public class Validator {
 		throw new ParserException(String.format("%s is not a valid simple statement", simpleStatement));
 	}
 
+	/**
+	 * isValidVariableDeclaration
+	 * 
+	 */
 	public boolean isValidVariableDeclaration(String varDeclaration) {
 		//initialize data type for adding to declaredVariables map
 		DataType type = null;
@@ -661,89 +665,143 @@ public class Validator {
 	}
 
 	/**
-	 * Returns true if the string passed is a valid Switch Statement TODO Katie
-	 * 
+	 * Returns true if the string passed is a valid Switch Statement 
+	 * @author Katie Tracy 
 	 * @param switchBlock
 	 * @return True if Switch statement is valid
 	 */
 	public boolean isValidSwitch(String switchBlock) {
 		// Check types in block, do they all match?
-
-		if (switchBlock.matches("\\A\\s*switch\\?\\(.+\\).*:")) {
-			
-		}
-		
-		
+		String switchPattern = "\\A\\s*switch\\s?\\([\\s\\S]+\\)\\s?\\{[case [A-z0-9$_]*\\:[[\\s\\S]*break;]]*[default:[\\s\\S]?]}";
 		// is the syntax correct?
-
-		// is the syntax correct?*if\\s?\\(.+\\).*"))
-		if (!switchBlock.matches("\\A\\s*switch\\s?\\(.Variable\\).\\{.[case DataType\\:.\\s?[Statement]] [default:]?}")) {
+		if (!switchBlock.matches(switchPattern)) {
 			throw new ParserException(String.format("Invalid switch statement: \"%s\".", switchBlock));
 		}
-		//switch (Variable) {[case DataType: [Statement]] [default:]?}
+		//Splitting technique edited from Sam's variable declaration method
+		//split declaration statement into type and var name, excluding semicolon
+		String [] switchTokens = switchBlock.split(" ");
+		String newVarType = switchTokens[0].trim();
+		String newVar = switchTokens[1].trim().substring(0, switchTokens[1].indexOf(';'));
+		
+		
 
 		return true;
 	}
 
 	/**
 	 * Returns true if the string passed is a valid While Loop TODO Katie
-	 * 
+	 * @author Katie Tracy 
 	 * @param whileLoop
 	 * @return True if while loop is valid
 	 */
 	public boolean isValidWhile(String whileLoop) {
-		// Author Katie 
-		// Check that block is a valid block
-
-
-		// Check that statement at beginning of block contains a valid boolean expression
-		if (whileLoop.matches("\\A\\s*while\\s?\\(.+\\).*")) {
-			// inc first index, exc last index
-			// Check if it contains a valid boolean expression
-			int startIndex = whileLoop.indexOf('(') + 1;
-			int endIndex = whileLoop.indexOf(')');
-			if (isValidBoolExpression(whileLoop.substring(startIndex, endIndex))) {
-				// TODO Katie process rest of line after closing paren of while block, throw errors
-				// where appropriate
-				isValidCodeBlock(whileLoop);
+		
+		String whilePatt = "\\A\\s*while\\s?\\([\\s\\S]+\\)\\s*\\{[\\s\\S]*\\}";
+		
+		//check if the While statement does not match the pattern while()
+		if (!whileLoop.matches(whilePatt)) {
+				throw new ParserException(String.format("Invalid while statement: \"%s\".", whileLoop));
+		}
+		
+		//proceed with check if while statement matches the pattern while()
+		if (whileLoop.matches(whilePatt)) {
+		// Check if it contains a valid boolean expression
+		int startIndex = whileLoop.indexOf('(') + 1;
+		int endIndex = whileLoop.indexOf(')');
+		
+		System.out.println(whileLoop.substring(startIndex, endIndex));
+		if (!isValidBoolExpression(whileLoop.substring(startIndex, endIndex))) {
+			throw new ParserException(String.format("Invalid while condition - must be boolean: \"%s\".", whileLoop));
+		}
+		
+		// Katie process rest of line after closing paren of while block, throw errors where appropriate 
+		/*code below, up to 'return true' comes from sam's ifBlock method, with renaming of variables for this method*/
+		// remove while(....) from whileLoop
+		String remainingWhile = whileLoop.substring(whileLoop.indexOf(')') + 1).trim();
+		System.out.println(remainingWhile);
+		// Get block of code if it exists and check if valid code block
+		if (remainingWhile.charAt(0) == '{') {
+			//added start and end checks by Katie, edited from Sam's code for if 
+			int indexOfClosingBrace = getPositionOfClosingBrace(remainingWhile);
+			System.out.println(indexOfClosingBrace);
+			int start = 1;
+			int end = indexOfClosingBrace - 1;
+			int length = end - start;
+			if (length > 2) { //valid code block
+				String codeBlock = remainingWhile.substring(start, end).trim();
+				if(!isValidCodeBlock(codeBlock)) {
+					throw new ParserException("I don't know how you got here, so congratulations on that.");
+				}
+			}
+			else {
 				return true;
 			}
+//			if (indexOfClosingBrace > 0 && end > start) {
+//				String codeBlock = remainingWhile.substring(start, end).trim();
+//				if (!isValidCodeBlock(codeBlock)) {
+//					throw new ParserException("I don't know how you got here, so congratulations on that.");
+//				}
+//			}
+//			else if (indexOfClosingBrace > 0 && end <= start) {
+//				String codeBlock = remainingWhile.substring(start, end).trim();
+//				if (!isValidCodeBlock(codeBlock)) {
+//					throw new ParserException("I don't know how you got here, so congratulations on that.");
+//				}
+//			}
+		} else {
+			// Remaining code in block is assumed to be a simple statement
+			if (!isValidSimpleStatement(remainingWhile)) {
+				throw new ParserException("I don't know how you got here, so congratulations on that.");
+			}
 		}
-
-		//if (!whileLoop.matches(""))
-		// Check that statement at end of block contains a valid boolean expression
-
 		return true;
+		}	
+		//thrown if string did not match while loop declaration structure at all
+		throw new ParserException(String.format("%s : not a valid while loop declaration", whileLoop));
+
 	}
 	
 	/**
 	 * Returns true if the string passed is a valid While Loop
-	 * TODO Katie
+	 * TODO Katie Tracy 
 	 * @param doWhileLoop
 	 * @return True if doWhileLoop is valid
 	 */
 
 	public boolean isValidDoWhile(String doWhileLoop) {
 		//Author Katie
-		if (doWhileLoop.matches("\\A\\s*do\\s?{.+\\}.\\s*while\\s?(.+\\).*")) {
+		String doWhilePattern = "\\A\\s*do\\s?\\{[\\s\\S]*\\}\\s?while\\s?\\([\\s\\S]+\\);";
+		if (doWhileLoop.matches(doWhilePattern)){
 			// inc first index, exc last index
-			// Check if it contains a valid boolean expression
-			int startIndex = doWhileLoop.indexOf('(') + 1;
-			int endIndex = doWhileLoop.indexOf(')');
-			// Check that statement at end of block contains a valid boolean expression
-			if (isValidBoolExpression(doWhileLoop.substring(startIndex, endIndex))) {
-				// TODO Katie process rest of line after closing paren of do block, throw errors
-				// where appropriate
-				// TODO will change when we have a isValidCodeBlock method
-				int start = doWhileLoop.indexOf('{') + 1;
-				int end = doWhileLoop.indexOf('}');
-				if (isValidCodeBlock(doWhileLoop.substring(start, end))){
-					return true;
+		
+			// TODO Katie process rest of line after closing paren of do block, throw errorswhere appropriate
+			// TODO will change when we have a isValidCodeBlock method
+			int startCurly = doWhileLoop.indexOf('{') + 1;
+			int indexOfClosingBrace = getPositionOfClosingBrace(doWhileLoop);
+			System.out.println(indexOfClosingBrace);
+			int start = 1;
+			int end = indexOfClosingBrace - 1;
+			int length = end - start;
+			if (length > 2) { //valid code block
+				String codeBlock = doWhileLoop.substring(start, end).trim();
+				if(!isValidCodeBlock(codeBlock)) {
+					throw new ParserException("I don't know how you got here, so congratulations on that.");
 				}
 			}
+			else {
+				// Check if it contains a valid boolean expression in while condition
+				String remainingDoWhile = doWhileLoop.substring(indexOfClosingBrace, doWhileLoop.length()-1);
+				System.out.println(remainingDoWhile);
+				//int openParens = doWhileLoop.indexOf('(') + 1;
+				//int endParens = doWhileLoop.indexOf(')');
+				//if (!isValidBoolExpression(doWhileLoop.substring(openParens, endParens))) {
+				//	throw new ParserException(String.format("Invalid do-while condition: \"%s\".", doWhileLoop));
+				//}
+				return true;
+			}
 		}
+			return true;
 		
-		return true;
 	}
 
 	/*
