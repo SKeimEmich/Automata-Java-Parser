@@ -16,7 +16,8 @@ import org.junit.runners.Suite;
 	isValidAssignmentTests.class,
 	isValidForTests.class,
 	isValidOperationTest.class,
-	isValidWhileLoopTests.class
+	isValidWhileLoopTests.class, 
+	isValidSwitchTests.class
 })
 
 public class TestSuite{}

@@ -672,19 +672,42 @@ public class Validator {
 	 */
 	public boolean isValidSwitch(String switchBlock) {
 		// Check types in block, do they all match?
-		String switchPattern = "\\A\\s*switch\\s?\\([\\s\\S]+\\)\\s?\\{[case [A-z0-9$_]*\\:[[\\s\\S]*break;]]*[default:[\\s\\S]?]}";
+		String switchPattern = "\\A\\s*switch\\s?\\([\\s\\S]+\\)\\s?\\{[case [A-z0-9$_]*:[[\\s\\S]*[break;]?]]*[default:[\\s\\S]?]}";
 		// is the syntax correct?
 		if (!switchBlock.matches(switchPattern)) {
 			throw new ParserException(String.format("Invalid switch statement: \"%s\".", switchBlock));
 		}
+		if (switchBlock.matches(switchPattern)) {
+			//check if valid condition - data type - char or int
+			String remainingSwitch = switchBlock;
+			int start = switchBlock.indexOf('(') + 1; //Get the index of the paren for switch condish
+			int end = switchBlock.indexOf(')'); //Get the index of the closing paren for switch condish
+			String switchCondish = switchBlock.substring(start, end);
+			//Check if condition variable is in declaredVariables Map
+			if (!declaredVariables.containsKey(switchCondish)) {
+				throw new ParserException(String.format("Condition has not been declared previously: \"%s\".", switchCondish));
+			}
+			if (declaredVariables.containsKey(switchCondish)) {
+				DataType type = declaredVariables.get(switchCondish); //get data type
+				System.out.println(type);
+				if (type != DataType.INT && type != DataType.CHAR) {
+					throw new ParserException(String.format("Not a valid Data Type: \"%s\".", switchCondish));
+				}
+			}
+			
+			remainingSwitch = remainingSwitch.substring(end, switchBlock.length());
+			System.out.println("REMAINING SWITCH:");
+			System.out.println(remainingSwitch);
+			
+		}
+			
 		//Splitting technique edited from Sam's variable declaration method
 		//split declaration statement into type and var name, excluding semicolon
-		String [] switchTokens = switchBlock.split(" ");
-		String newVarType = switchTokens[0].trim();
-		String newVar = switchTokens[1].trim().substring(0, switchTokens[1].indexOf(';'));
+		String[]  switchTokens = switchBlock.split(" ");
+		for (int i = 0; i< switchTokens.length;i++) {
+			System.out.println(switchTokens[i]);
+		}
 		
-		
-
 		return true;
 	}
 
@@ -736,18 +759,7 @@ public class Validator {
 			else {
 				return true;
 			}
-//			if (indexOfClosingBrace > 0 && end > start) {
-//				String codeBlock = remainingWhile.substring(start, end).trim();
-//				if (!isValidCodeBlock(codeBlock)) {
-//					throw new ParserException("I don't know how you got here, so congratulations on that.");
-//				}
-//			}
-//			else if (indexOfClosingBrace > 0 && end <= start) {
-//				String codeBlock = remainingWhile.substring(start, end).trim();
-//				if (!isValidCodeBlock(codeBlock)) {
-//					throw new ParserException("I don't know how you got here, so congratulations on that.");
-//				}
-//			}
+
 		} else {
 			// Remaining code in block is assumed to be a simple statement
 			if (!isValidSimpleStatement(remainingWhile)) {
