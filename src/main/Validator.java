@@ -11,7 +11,6 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,7 +22,7 @@ public class Validator {
 	private Map<String, DataType> declaredVariables;
 	private boolean isValidated;
 	private boolean isValid;
-	private Stack<Character> parens;
+	String fileName;
 
 	// Constructor
 	public Validator() {
@@ -35,6 +34,16 @@ public class Validator {
 
 	public Validator(String fileName) {
 		this();
+		setFileName(fileName);
+	}
+
+	// Setup Methods for the constructor to use
+	
+	/** Reads in File
+	 * 
+	 * 
+	 */
+	private void readFile(){
 		// Construct a scanner object to read from file
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(fileName));
@@ -49,14 +58,11 @@ public class Validator {
 			sb.deleteCharAt(sb.length() - 1);
 			reader.close();
 			code = sb.toString();
-		} catch (FileNotFoundException fnfe) {
-			System.err.printf("File %s not found, please try again.", fileName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 	}
-
-	// Setup Methods for the constructor to use
 	/**
 	 * Reads in Java Reserved Keywords from file
 	 * 
@@ -84,6 +90,10 @@ public class Validator {
 
 	public boolean isValid() {
 		return isValid;
+	}
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+		readFile();
 	}
 
 	// Main Method to be run
@@ -468,8 +478,6 @@ public class Validator {
 			int indexOfClosingBrace = getPositionOfClosingBrace(remainingIf);
 			if (indexOfClosingBrace > 0) {
 				String codeBlock = remainingIf.substring(1, indexOfClosingBrace - 1).trim();
-//				String codeBlock = remainingIf.substring(0, indexOfClosingBrace + 1).trim();
-				// TODO THIS LINE IS HTE ONE YOU CHANGED
 				if (!isValidCodeBlock(codeBlock)) {
 					throw new ParserException("I don't know how you got here, so congratulations on that.");
 				}
