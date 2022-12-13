@@ -27,11 +27,6 @@ class isValidSimpleStatementTests {
     }
 
     @Test
-    void testValidPrintf() {
-        assertTrue(validator.isValidSimpleStatement("System.out.printf(\"test string\");"));
-    }
-
-    @Test
     void testPrintStatementExtraSpaces() {
         assertTrue(validator.isValidSimpleStatement("System.out.print  (\"test string\");"));
     }
@@ -79,6 +74,16 @@ class isValidSimpleStatementTests {
     @Test
     void testOperationStatement() {
         assertTrue(validator.isValidSimpleStatement("2 + 5.0;"));
+    }
+
+    @Test
+    void testBreak() {
+        assertTrue(validator.isValidSimpleStatement("break;"));
+    }
+
+    @Test
+    void testContinue() {
+        assertTrue(validator.isValidSimpleStatement("continue;"));
     }
 
 }

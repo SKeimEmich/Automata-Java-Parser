@@ -55,6 +55,13 @@ class isValidOperationTest {
     }
 
     @Test
+    void testDoubleOps() {
+        validator.addVariable("doubleTest", DataType.DOUBLE);
+        assertTrue(validator.isValidOperation("2.0 * 4.0 + 2.0;"));
+        assertTrue(validator.isValidOperation("doubleTest / doubleTest % doubleTest;"));
+    }
+
+    @Test
     void testInvalidInlineOps() {
         assertFalse(validator.isValidOperation("testValue-;"));
         assertFalse(validator.isValidOperation("testValue+;"));
