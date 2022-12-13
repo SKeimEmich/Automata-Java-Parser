@@ -889,7 +889,7 @@ public class Validator {
 			int indexOfOpeningBrace = codeBlock.indexOf('{');
 			int endOfStatement = getPositionOfClosingBrace(codeBlock.substring(codeBlock.indexOf('{'))) + indexOfOpeningBrace;
 			// if it is a do-while, get the while at the end
-			if(codeBlock.startsWith("do")) {
+			if(!codeBlock.startsWith("double") && codeBlock.startsWith("do")) {
 				// starting at the index of the closing curly brace
 				// search for the next ;
 				// update closing index to this index
