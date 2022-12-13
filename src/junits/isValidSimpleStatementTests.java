@@ -44,7 +44,7 @@ class isValidSimpleStatementTests {
 
     @Test
     void isValidComment() {
-        assertTrue(validator.isValidSimpleStatement("//this is a test comment!1234459dkd.asdoawerijqweadlk"));
+        assertTrue(validator.isValidSimpleStatement("//this is a test comment!1234459dkd.asdoawerijqweadlk\n"));
     }
 
     @Test

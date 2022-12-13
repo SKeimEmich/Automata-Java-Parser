@@ -16,7 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import exceptions.ParserException;
-
+//todo: print variables in print statement, operations in print statement
 public class Validator {
 	private String code; // Shouldn't be touched outside of this class
 	private ArrayList<String> reservedKeywords;
@@ -65,7 +65,7 @@ public class Validator {
 	private ArrayList<String> getReservedKeywords() {
 		Scanner s = null;
 		try {
-			s = new Scanner(new File("ReservedKeywords.txt"));
+			s = new Scanner(new File("./Automata-Java-Parser/ReservedKeywords.txt"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -167,7 +167,7 @@ public class Validator {
 			if (remainingFor.charAt(0) == '{') {
 				int indexOfClosingBrace = getPositionOfClosingBrace(remainingFor);
 				if (indexOfClosingBrace > 0) {
-					String codeBlock = remainingFor.substring(1, indexOfClosingBrace - 1).trim();
+					String codeBlock = remainingFor.substring(1, indexOfClosingBrace).trim();
 					if (!isValidCodeBlock(codeBlock)) {
 						throw new ParserException("I don't know how you got here, so congratulations on that.");
 					}
@@ -186,6 +186,7 @@ public class Validator {
 
 	/**
 	 * @param simpleStatement
+	 *todo: break and continue
 	 * @return True if simple statement is valid
 	 * throws parserException if simple statement is not valid
 	 * Jon
@@ -209,7 +210,7 @@ public class Validator {
 		}
 
 		//inline comment
-		if(simpleStatement.matches("\\s*//.*")){
+		if(simpleStatement.matches("\\s*//[^\n]*\n")){
 			return true;
 		}
 
@@ -759,12 +760,19 @@ public class Validator {
 		} else {
 			// The next part of the codeblock to process is not a complex statement, assume it is a simple statement
 			if(codeBlock.substring(0,2).equals("/*")) { // Check if it's a block comment
-				statementToCheck = codeBlock.substring(0, codeBlock.indexOf("*/") + 2);
+				statementToCheck = codeBlock.substring(0, codeBlock.indexOf("*/") + 2).trim();
 				remainingCodeBlock = codeBlock.substring(codeBlock.indexOf("*/") + 2);
 			}
 			else if (codeBlock.charAt(0) == '/') { // Check if it's an inline comment
-				statementToCheck = codeBlock.substring(0, codeBlock.indexOf('\n'));
-				remainingCodeBlock = codeBlock.substring(codeBlock.indexOf('\n') + 1);
+				//condition for when a comment is the last statement in a code block, because the newline is trimmed
+				if(codeBlock.indexOf('\n') == -1) {
+					statementToCheck = codeBlock + "\n"; //append a newline to check its validity as a comment
+					remainingCodeBlock = "";
+				}
+				else {
+					statementToCheck = codeBlock.substring(0, codeBlock.indexOf('\n') + 1);
+					remainingCodeBlock = codeBlock.substring(codeBlock.indexOf('\n') + 1);
+				}
 			}
 			else { // It's not a block or an inline comment, cut out the simple statement and parse
 				statementToCheck = codeBlock.substring(0, codeBlock.indexOf(';') + 1).trim();
