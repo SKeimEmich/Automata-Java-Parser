@@ -19,36 +19,37 @@ public class isValidSwitchTests {
 				+ "case 1: System.out.print(\"January\"); break;"
 				+ "case 2: System.out.print(\"February\"); break;"
 				+ "default: System.out.print(\"This is not a valid month\");}"));
-//		assertTrue(validator.isValidSwitch("switch (vowel){"
-//				+ "case 'a': System.out.print(\"January\"); break;"
-//				+ "case 'e': System.out.print(\"February\"); break;"
-//				+ "default: System.out.print(\"This is not a valid month\");}"));	
-//		assertTrue(validator.isValidSwitch("switch (vowel){"
-//						+ "case 'i': System.out.print(\"January\"); break;"
-//						+ "case 'o': System.out.print(\"February\"); break;"
-//						+ "default: System.out.print(\"This is not a valid month\");}"));
-//		assertTrue(validator.isValidSwitch("switch (month){"
-//				+ "case 1: System.out.print(\"January\"); break;"
-//				+ "case 2: System.out.print(\"February\"); break;}"));
-//		assertTrue(validator.isValidSwitch("switch (month){"
-//				+ "case 1: System.out.print(\"January\"); break;"
-//				+ "case 2: System.out.print(\"February\"); break;}"));
+		assertTrue(validator.isValidSwitch("switch (vowel){"
+				+ "case 'a': System.out.print(\"January\"); break;"
+				+ "case 'e': System.out.print(\"February\"); break;"
+				+ "default: System.out.print(\"This is not a valid month\");}"));	
+		assertTrue(validator.isValidSwitch("switch (vowel){"
+						+ "case 'i': System.out.print(\"January\"); break;"
+						+ "case 'o': System.out.print(\"February\"); break;"
+						+ "default: System.out.print(\"This is not a valid month\");}"));
+		assertTrue(validator.isValidSwitch("switch (month){"
+				+ "case 1: System.out.print(\"January\"); break;"
+				+ "case 2: System.out.print(\"February\"); break;}"));
+		assertTrue(validator.isValidSwitch("switch (month){"
+				+ "case 1: System.out.print(\"January\"); break;"
+				+ "case 2: System.out.print(\"February\"); break;}"));
+	
 	}
 	
-	/*
-	 * void testInvalidSwitch() { validator.addVariable("month", DataType.INT);
-	 * assertThrows(ParserException.class, () ->
-	 * validator.isValidSwitch("switch (letter){" +
-	 * "case 1: System.out.print(\"January\"); break;" +
-	 * "case 2: System.out.print(\"February\"); break;" +
-	 * "default: System.out.print(\"This is not a valid month\");}"));
-	 * assertThrows(ParserException.class, () ->
-	 * validator.isValidSwitch("switch (month){" +
-	 * "case 1: System.out.print(\"January\") break;" +
-	 * "case \"two\": System.out.print(\"February\") break;"));
-	 * assertThrows(ParserException.class, ()
-	 * ->validator.isValidSwitch("switch (month){" +
-	 * "case 1: System.out.print(\"January\") break;" +
-	 * "case 2: System.out.print(\"February\");")); }
-	 */
+	
+	  void testInvalidSwitch() { validator.addVariable("month", DataType.INT);
+	  assertThrows(ParserException.class, () ->
+	  validator.isValidSwitch("switch (letter){" +
+	  "case 1: System.out.print(\"January\"); break;" +
+	  "case 2: System.out.print(\"February\"); break;" +
+	  "default: System.out.print(\"This is not a valid month\");}"));
+	  assertThrows(ParserException.class, () ->
+	  validator.isValidSwitch("switch (month){" +
+	  "case 1: System.out.print(\"January\") break;" +
+	  "case \"two\": System.out.print(\"February\")"));
+	  assertThrows(ParserException.class, ()
+	  ->validator.isValidSwitch("switch (month){" +
+	  "case 1: System.out.print(\"January\") break;" +
+	  "case 2: System.out.print(\"February\");")); }
+	 
 }

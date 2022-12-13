@@ -703,67 +703,55 @@ public class Validator {
 				}
 			}
 			
-			//Check if case data type matches DataType of condition
+			//Check if case data type matches DataType of switch condition
 			remainingSwitch = remainingSwitch.substring(end+1, switchBlock.length());
+			
 			String checkRemainingSwitch = remainingSwitch;
+			
 			int caseCount = 0;
 			String casePatt = "case";
 			//get number of cases 
 			for (int i = 0; i < checkRemainingSwitch.length(); i++) {
+				//System.out.println(checkRemainingSwitch);
 				if (checkRemainingSwitch.contains(casePatt)) {
 					int index = checkRemainingSwitch.indexOf(casePatt);
-					System.out.println(index);
+					
 					caseCount++;
-					checkRemainingSwitch = checkRemainingSwitch.substring(index-1, remainingSwitch.length()).trim();
-					System.out.println(remainingSwitch);
+					checkRemainingSwitch = checkRemainingSwitch.substring(index+4, checkRemainingSwitch.length()).trim();
+					
 				}
 				
 			}
-			//
-			System.out.println(caseCount);
-			//for each of those cases
+			
+			//For each of the cases, check if their data type matches the switch condition data type
 			for (int i = 0; i < caseCount; i++) {
+				
 				start = remainingSwitch.indexOf("case:");
-				//System.out.println(start);
-				//start = remainingSwitch.indexOf('e');
+				
+				start = remainingSwitch.indexOf('e')+1;
 				end = remainingSwitch.indexOf(':');
 				
-				String switchCase = remainingSwitch.substring(start+6, end).trim();
-				System.out.println(switchCase);
+				String switchCase = remainingSwitch.substring(start, end).trim();
+				
 				//otherwise, we check the conditions of the remaining "case" cases
 				DataType caseType = getType(switchCase);
 				
 				if (declaredVariables.get(switchCondish)!=caseType) {
 					throw new ParserException(String.format("Condition and case type do not match: \"%s\".", remainingSwitch));
 				}
-				System.out.println("REMAINING SWITCH:");
-				System.out.println(remainingSwitch);
-				System.out.println(remainingSwitch.length());
 				
-				int newEnd = end + 1;
-				System.out.println(newEnd);
-				if (newEnd < switchBlock.length()) {
-					remainingSwitch = remainingSwitch.substring(end+1, remainingSwitch.length()).trim();
+				
+				int newEnd = remainingSwitch.indexOf("break;") + 6;
+				
+				if (newEnd < remainingSwitch.length()) {
+					remainingSwitch = remainingSwitch.substring(newEnd, remainingSwitch.length()).trim();
 				}
-				System.out.println("REMAINING SWITCH:");
-				System.out.println(remainingSwitch);
+				else {
+					throw new ParserException(String.format("Reached the end of the switch statement without checking all cases @ \"%s\".", remainingSwitch));
+				}
+			
 			
 			}
-			/**
-			start = remainingSwitch.indexOf('e');
-			end = remainingSwitch.indexOf(':');
-			
-			String switchCase = remainingSwitch.substring(start+1, end).trim();
-			
-			DataType caseType = getType(switchCase);
-			
-			if (declaredVariables.get(switchCondish)!=caseType) {
-				throw new ParserException(String.format("Condition and case type do not match: \"%s\".", remainingSwitch));
-			}
-			
-			*/
-			System.out.println("REMAINING SWITCH:");
-			System.out.println(remainingSwitch);
 			
 		}
 		
