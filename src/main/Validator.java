@@ -76,7 +76,7 @@ public class Validator {
 			e.printStackTrace();
 		}
 		reservedKeywords = new ArrayList<String>();
-		while (s.hasNext()) {
+		while (s.hasNext()) {e
 			reservedKeywords.add(s.next());
 		}
 		s.close();
@@ -172,7 +172,6 @@ public class Validator {
 			 /*code below, up to 'return true' comes from sam's ifBlock method, with renaming of variables for this method*/
 			// remove for(....) from forLoop
 			String remainingFor = forLoop.substring(forLoop.indexOf(')') + 1).trim();
-			System.out.println(remainingFor);
 			// Get block of code if it exists
 			if (remainingFor.charAt(0) == '{') {
 				int indexOfClosingBrace = getPositionOfClosingBrace(remainingFor);
