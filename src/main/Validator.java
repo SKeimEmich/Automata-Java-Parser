@@ -680,7 +680,7 @@ public class Validator {
 	 */
 	public boolean isValidSwitch(String switchBlock) {
 		// Check types in block, do they all match?
-		String switchPattern = "\\A\\s*switch\\s?\\([\\s\\S]+\\)\\s?\\{[case [A-z0-9$_]*:[[\\s\\S]*[break;]?]]*[default:[\\s\\S]?]}";
+		String switchPattern = "\\A\\s*switch\\s?\\([\\s\\S]+\\)\\s?\\{[case [\\s\\S]*:[[\\s\\S]*[break;]?]]*[default:[\\s\\S]?]}";
 		// is the syntax correct?
 		if (!switchBlock.matches(switchPattern)) {
 			throw new ParserException(String.format("Invalid switch statement: \"%s\".", switchBlock));
@@ -697,24 +697,76 @@ public class Validator {
 			}
 			if (declaredVariables.containsKey(switchCondish)) {
 				DataType type = declaredVariables.get(switchCondish); //get data type
-				System.out.println(type);
+				//System.out.println("condish type: " + type);
 				if (type != DataType.INT && type != DataType.CHAR) {
 					throw new ParserException(String.format("Not a valid Data Type: \"%s\".", switchCondish));
 				}
 			}
 			
-			remainingSwitch = remainingSwitch.substring(end, switchBlock.length());
+			//Check if case data type matches DataType of condition
+			remainingSwitch = remainingSwitch.substring(end+1, switchBlock.length());
+			String checkRemainingSwitch = remainingSwitch;
+			int caseCount = 0;
+			String casePatt = "case";
+			//get number of cases 
+			for (int i = 0; i < checkRemainingSwitch.length(); i++) {
+				if (checkRemainingSwitch.contains(casePatt)) {
+					int index = checkRemainingSwitch.indexOf(casePatt);
+					System.out.println(index);
+					caseCount++;
+					checkRemainingSwitch = checkRemainingSwitch.substring(index-1, remainingSwitch.length()).trim();
+					System.out.println(remainingSwitch);
+				}
+				
+			}
+			//
+			System.out.println(caseCount);
+			//for each of those cases
+			for (int i = 0; i < caseCount; i++) {
+				start = remainingSwitch.indexOf("case:");
+				//System.out.println(start);
+				//start = remainingSwitch.indexOf('e');
+				end = remainingSwitch.indexOf(':');
+				
+				String switchCase = remainingSwitch.substring(start+6, end).trim();
+				System.out.println(switchCase);
+				//otherwise, we check the conditions of the remaining "case" cases
+				DataType caseType = getType(switchCase);
+				
+				if (declaredVariables.get(switchCondish)!=caseType) {
+					throw new ParserException(String.format("Condition and case type do not match: \"%s\".", remainingSwitch));
+				}
+				System.out.println("REMAINING SWITCH:");
+				System.out.println(remainingSwitch);
+				System.out.println(remainingSwitch.length());
+				
+				int newEnd = end + 1;
+				System.out.println(newEnd);
+				if (newEnd < switchBlock.length()) {
+					remainingSwitch = remainingSwitch.substring(end+1, remainingSwitch.length()).trim();
+				}
+				System.out.println("REMAINING SWITCH:");
+				System.out.println(remainingSwitch);
+			
+			}
+			/**
+			start = remainingSwitch.indexOf('e');
+			end = remainingSwitch.indexOf(':');
+			
+			String switchCase = remainingSwitch.substring(start+1, end).trim();
+			
+			DataType caseType = getType(switchCase);
+			
+			if (declaredVariables.get(switchCondish)!=caseType) {
+				throw new ParserException(String.format("Condition and case type do not match: \"%s\".", remainingSwitch));
+			}
+			
+			*/
 			System.out.println("REMAINING SWITCH:");
 			System.out.println(remainingSwitch);
 			
 		}
-			
-		//Splitting technique edited from Sam's variable declaration method
-		//split declaration statement into type and var name, excluding semicolon
-		String[]  switchTokens = switchBlock.split(" ");
-		for (int i = 0; i< switchTokens.length;i++) {
-			System.out.println(switchTokens[i]);
-		}
+		
 		
 		return true;
 	}
@@ -740,7 +792,7 @@ public class Validator {
 		int startIndex = whileLoop.indexOf('(') + 1;
 		int endIndex = whileLoop.indexOf(')');
 		
-		System.out.println(whileLoop.substring(startIndex, endIndex));
+		//System.out.println(whileLoop.substring(startIndex, endIndex));
 		if (!isValidBoolExpression(whileLoop.substring(startIndex, endIndex))) {
 			throw new ParserException(String.format("Invalid while condition - must be boolean: \"%s\".", whileLoop));
 		}
@@ -749,22 +801,24 @@ public class Validator {
 		/*code below, up to 'return true' comes from sam's ifBlock method, with renaming of variables for this method*/
 		// remove while(....) from whileLoop
 		String remainingWhile = whileLoop.substring(whileLoop.indexOf(')') + 1).trim();
-		System.out.println(remainingWhile);
+		
 		// Get block of code if it exists and check if valid code block
 		if (remainingWhile.charAt(0) == '{') {
 			//added start and end checks by Katie, edited from Sam's code for if 
 			int indexOfClosingBrace = getPositionOfClosingBrace(remainingWhile);
-			System.out.println(indexOfClosingBrace);
+			
 			int start = 1;
 			int end = indexOfClosingBrace - 1;
 			int length = end - start;
 			if (length > 2) { //valid code block
-				String codeBlock = remainingWhile.substring(start, end).trim();
+				String codeBlock = remainingWhile.substring(start, end+1).trim();
+				
 				if(!isValidCodeBlock(codeBlock)) {
 					throw new ParserException("I don't know how you got here, so congratulations on that.");
 				}
 			}
 			else {
+				
 				return true;
 			}
 
@@ -796,11 +850,14 @@ public class Validator {
 		
 			// TODO Katie process rest of line after closing paren of do block, throw errorswhere appropriate
 			// TODO will change when we have a isValidCodeBlock method
-			int startCurly = doWhileLoop.indexOf('{') + 1;
-			int indexOfClosingBrace = getPositionOfClosingBrace(doWhileLoop);
-			System.out.println(indexOfClosingBrace);
-			int start = 1;
-			int end = indexOfClosingBrace - 1;
+			int indexOfOpeningBrace = doWhileLoop.indexOf('{');
+
+			int indexOfClosingBrace = getPositionOfClosingBrace(doWhileLoop.substring(indexOfOpeningBrace));
+			
+			int start = indexOfOpeningBrace+1;
+	
+			int end = indexOfClosingBrace+2;
+			
 			int length = end - start;
 			if (length > 2) { //valid code block
 				String codeBlock = doWhileLoop.substring(start, end).trim();
@@ -810,13 +867,16 @@ public class Validator {
 			}
 			else {
 				// Check if it contains a valid boolean expression in while condition
-				String remainingDoWhile = doWhileLoop.substring(indexOfClosingBrace, doWhileLoop.length()-1);
-				System.out.println(remainingDoWhile);
-				//int openParens = doWhileLoop.indexOf('(') + 1;
-				//int endParens = doWhileLoop.indexOf(')');
-				//if (!isValidBoolExpression(doWhileLoop.substring(openParens, endParens))) {
-				//	throw new ParserException(String.format("Invalid do-while condition: \"%s\".", doWhileLoop));
-				//}
+				String remainingDoWhile = doWhileLoop.substring(indexOfClosingBrace+3, doWhileLoop.length()-1).trim();
+				
+				
+				int openParens = remainingDoWhile.indexOf('(') + 1;
+				
+				int endParens = remainingDoWhile.indexOf(')');
+				
+				if (!isValidBoolExpression(remainingDoWhile.substring(openParens, endParens))) {
+					throw new ParserException(String.format("Invalid do-while condition: \"%s\".", remainingDoWhile));
+				}
 				return true;
 			}
 		}
