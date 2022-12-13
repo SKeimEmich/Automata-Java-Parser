@@ -76,7 +76,7 @@ public class Validator {
 			e.printStackTrace();
 		}
 		reservedKeywords = new ArrayList<String>();
-		while (s.hasNext()) {e
+		while (s.hasNext()) {
 			reservedKeywords.add(s.next());
 		}
 		s.close();
