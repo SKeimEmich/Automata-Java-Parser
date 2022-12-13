@@ -1,8 +1,12 @@
 public static void main(){
+double k;
 int j;
 int i;
 char char1 = 'a';
 char character = 'c' + 'a';
+do {
+	int foo;
+} while(false);
 //first for loop
 for(i = 2; i > 8; i++) {
 i++;
