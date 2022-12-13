@@ -203,19 +203,10 @@ public class Validator {
 	public boolean isValidSimpleStatement(String simpleStatement) {
 
 		// checking if valid print statement
-		if (simpleStatement.matches("\\s*System\\.out\\.(println|printf|print)\\s*\\(\".+\"\\);")) {
-
-			//extract code between parentheses, will be 'printBlock'
-			int startIndex = simpleStatement.indexOf('(') + 1;
-			int endIndex = simpleStatement.indexOf(')');
-
-			// print statement should be a string literal enclosed by quotations
-			String printBlock = simpleStatement.substring(startIndex, endIndex);
-			Matcher quoteMatcher = Pattern.compile("\".*\"").matcher(printBlock);
-			if (quoteMatcher.find()) {
-				return true;
-			}
-			else throw new ParserException(String.format("%s is not a valid print statement, missing ' \" ", simpleStatement));
+		if (simpleStatement.matches("\\s*System\\.out\\.(println|print)\\s*\\(.+\\);")) {
+			if(!isValidPrintStatement(simpleStatement))
+				throw new ParserException(String.format("%s is not a valid print statement", simpleStatement));
+			else return true;
 		}
 
 		//inline comment
@@ -249,7 +240,55 @@ public class Validator {
 			else return true;
 		}
 
+		//valid operation check
+		if(simpleStatement.matches("^\\s*('\\w'|\\d+|\\w+|\\d*.\\d+)\\s*[+%/*-]\\s*('\\w'" +
+				"|\\d+|\\w+|\\d*.\\d+)\\s*([+%/*-]\\s*('\\w'|\\d+|\\w+|\\d*.\\d+)\\s*)*;$")) {
+			if(!isValidOperation(simpleStatement))
+				throw new ParserException(String.format("%s is not a valid operation", simpleStatement));
+			else return true;
+		}
+
+		//have to be implemented in a switch statement or loop
+		if(simpleStatement.matches("\\s*break;") )
+			return true;
+		if(simpleStatement.matches("\\s*continue;"))
+			return true;
+
+
 		throw new ParserException(String.format("%s is not a valid simple statement", simpleStatement));
+	}
+
+	public boolean isValidPrintStatement(String printStatement) {
+
+			//extract code between parentheses, will be 'printBlock'
+			int startIndex = printStatement.indexOf('(') + 1;
+			int endIndex = printStatement.indexOf(')');
+
+			// print statement should be a string literal enclosed by quotations
+			String printBlock = printStatement.substring(startIndex, endIndex);
+			//for string literal
+			Matcher quoteMatcher = Pattern.compile("^\".*\"$").matcher(printBlock);
+
+			//for variable
+			Matcher validVarMatcher = Pattern.compile("^\\w+$").matcher(printBlock);
+
+			if (quoteMatcher.find()) {
+				return true;
+			}
+
+			if(validVarMatcher.find()) {
+				return declaredVariables.containsKey(printBlock);
+			}
+
+			//check if it's a valid operation
+			if(printBlock.matches("^\\s*('\\w'|\\d+|\\w+|\\d*.\\d+)\\s*[+%/*-]\\s*('\\w'" +
+				"|\\d+|\\w+|\\d*.\\d+)\\s*([+%/*-]\\s*('\\w'|\\d+|\\w+|\\d*.\\d+)\\s*)*$")) {
+					printBlock += ';';
+
+				return isValidOperation(printBlock);
+			}
+
+			else throw new ParserException(String.format("%s is not a valid print statement", printStatement));
 	}
 
 	/**
@@ -277,10 +316,9 @@ public class Validator {
 			}
 
 			//add variable to map, if successful return true
-			if(addVariable(newVar, type))
-				return true;
+			return addVariable(newVar, type);
 		}
-		return false;
+		else return false;
 	}
 
 	
@@ -389,8 +427,8 @@ public class Validator {
 	public boolean isValidOperation(String operation) {
 
 		String process = " ";
-		if (operation.matches("^\\s*('\\w'|\\d+|\\w+)\\s*[+%/*-]\\s*('\\w'" +
-				"|\\d+|\\w+)\\s*([+%/*-]\\s*('\\w'|\\d+|\\w+)\\s*)*;$")) {
+		if (operation.matches("^\\s*('\\w'|\\d+|\\w+|\\d*.\\d+)\\s*[+%/*-]\\s*('\\w'" +
+				"|\\d+|\\w+|\\d*.\\d+)\\s*([+%/*-]\\s*('\\w'|\\d+|\\w+|\\d*.\\d+)\\s*)*;$")) {
 
 			String[] opArray = operation.split("[+%/*;-]");
 
