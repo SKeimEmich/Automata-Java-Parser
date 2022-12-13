@@ -17,7 +17,7 @@ public class RunMe {
 		Scanner scn = new Scanner(System.in);
 		String fileName, userInput;
 		boolean isContinue = true;
-		
+
 		System.out.println("Welcome to The Tigers' Java Parser program.");
 		System.out.println("Authors:");
 		System.out.println("\tKatie Tracy\n\tSam Keim\n\tJonathan Espinosa\n");
