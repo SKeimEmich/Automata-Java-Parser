@@ -240,14 +240,6 @@ public class Validator {
 			else return true;
 		}
 
-		//valid operation check
-		if(simpleStatement.matches("^\\s*('\\w'|\\d+|\\w+|\\d*.\\d+)\\s*[+%/*-]\\s*('\\w'" +
-				"|\\d+|\\w+|\\d*.\\d+)\\s*([+%/*-]\\s*('\\w'|\\d+|\\w+|\\d*.\\d+)\\s*)*;$")) {
-			if(!isValidOperation(simpleStatement))
-				throw new ParserException(String.format("%s is not a valid operation", simpleStatement));
-			else return true;
-		}
-
 		//have to be implemented in a switch statement or loop
 		if(simpleStatement.matches("\\s*break;") )
 			return true;
