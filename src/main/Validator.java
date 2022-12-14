@@ -686,6 +686,7 @@ public class Validator {
 
 		// check if variable was declared previously
 		// .get will not return null if it has been declared previously
+		System.out.println("Before check: " + declaredVariables);
 		if (declaredVariables.get(variableName) != null) {
 			throw new ParserException(String.format("Variable %s was declared previously.", variableName));
 		}
@@ -694,6 +695,7 @@ public class Validator {
 		// alphanumeric, digit, $ or _)
 		if (variableName.matches("[A-z$_]{1}[A-z0-9$_]*")) {
 			declaredVariables.put(variableName, type);
+			System.out.println("After put of " + variableName + ": " + declaredVariables);
 			return true;
 		}
 
@@ -929,11 +931,11 @@ public class Validator {
 		// Construct matchers to check if is a complex statement...
 		// ... with a simple statement
 		Matcher withSimpleMatcher = Pattern
-				.compile("\\A(\\s*(while|switch|if|for)\\s*\\([\\w\\s\\=\\;\\>\\<\\+\\-\\$]*\\)|\\s*do\\s*)")
+				.compile("\\A(\\s*(while|switch|if|for)\\s*\\([\\w\\s\\=\\;\\>\\<\\+\\-\\$]*\\)|\\s*do\\s+)")
 				.matcher(codeBlock);
 		// ... with a code block
 		Matcher withCodeBlockMatcher = Pattern
-				.compile("\\A(\\s*(while|switch|if|for)\\s*\\([\\w\\s\\=\\;\\>\\<\\+\\-\\$]*\\)\\s*\\{|\\s*do\\s*\\{)")
+				.compile("\\A(\\s*(while|switch|if|for)\\s*\\([\\w\\s\\=\\;\\>\\<\\+\\-\\$]*\\)\\s*\\{|\\s*do\\s+\\{)")
 				.matcher(codeBlock);
 
 		if (withCodeBlockMatcher.find()) { // check if we have a complex statement containing a code block
@@ -943,7 +945,7 @@ public class Validator {
 			int indexOfOpeningBrace = codeBlock.indexOf('{');
 			int endOfStatement = getPositionOfClosingBrace(codeBlock.substring(codeBlock.indexOf('{'))) + indexOfOpeningBrace;
 			// if it is a do-while, get the while at the end
-			if(!codeBlock.startsWith("double") && codeBlock.startsWith("do")) {
+			if(codeBlock.startsWith("do")) {
 				// starting at the index of the closing curly brace
 				// search for the next ;
 				// update closing index to this index
@@ -962,7 +964,6 @@ public class Validator {
 			// find ; at end of simple statement contained in this complex statement
 			int endOfStatement = codeBlock.indexOf(';');
 			 statementToCheck = codeBlock.substring(0, endOfStatement + 1);
-			
 			// pass to isValidComplexStatement
 			if (!isValidComplexStatement(statementToCheck)) {
 				throw new ParserException("I don't know how you got here, so congratulations on that.");
@@ -986,7 +987,7 @@ public class Validator {
 					remainingCodeBlock = codeBlock.substring(codeBlock.indexOf('\n') + 1);
 				}
 			}
-			else { // It's not a block or an inline comment, cut out the simple statement and parse
+			else { // It's not a block or an in line comment, cut out the simple statement and parse
 				statementToCheck = codeBlock.substring(0, codeBlock.indexOf(';') + 1).trim();
 				remainingCodeBlock = codeBlock.substring(codeBlock.indexOf(';') + 1);
 			}
