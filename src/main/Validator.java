@@ -804,6 +804,9 @@ public class Validator {
 				if(!isValidCodeBlock(codeBlock)) {
 					throw new ParserException("I don't know how you got here, so congratulations on that.");
 				}
+				if(!isValidSimpleStatement(codeBlock)) {
+					throw new ParserException("I don't know how you got here, so congratulations on that.");
+				}
 			}
 			else {
 				
@@ -850,6 +853,9 @@ public class Validator {
 			if (length > 2) { //valid code block
 				String codeBlock = doWhileLoop.substring(start, end).trim();
 				if(!isValidCodeBlock(codeBlock)) {
+					throw new ParserException("I don't know how you got here, so congratulations on that.");
+				}
+				if(!isValidSimpleStatement(codeBlock)) {
 					throw new ParserException("I don't know how you got here, so congratulations on that.");
 				}
 			}
