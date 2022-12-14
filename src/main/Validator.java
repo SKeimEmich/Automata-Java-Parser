@@ -459,7 +459,7 @@ public class Validator {
 	public boolean isValidMethodSignature(String methodSignature) {
 
 		// basic structure for method signature
-		if (methodSignature.matches("\\s*(public|private|protected)?\\s*static\\s*void\\s+[a-zA-z]+\\s*\\(\\s*\\)")) {
+		if (methodSignature.matches("\\s*(public\\s+|private\\s+|protected\\s+)?\\s*static\\s+void\\s+[a-zA-z]+\\s*\\(\\s*\\)")) {
 
 			// get substring up to opening parentheses of method declaration, split it into
 			// tokens
