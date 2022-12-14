@@ -686,7 +686,6 @@ public class Validator {
 
 		// check if variable was declared previously
 		// .get will not return null if it has been declared previously
-		System.out.println("Before check: " + declaredVariables);
 		if (declaredVariables.get(variableName) != null) {
 			throw new ParserException(String.format("Variable %s was declared previously.", variableName));
 		}
@@ -695,7 +694,6 @@ public class Validator {
 		// alphanumeric, digit, $ or _)
 		if (variableName.matches("[A-z$_]{1}[A-z0-9$_]*")) {
 			declaredVariables.put(variableName, type);
-			System.out.println("After put of " + variableName + ": " + declaredVariables);
 			return true;
 		}
 
@@ -887,9 +885,6 @@ public class Validator {
 				if(!isValidCodeBlock(codeBlock)) {
 					throw new ParserException("I don't know how you got here, so congratulations on that.");
 				}
-				if(!isValidSimpleStatement(codeBlock)) {
-					throw new ParserException("I don't know how you got here, so congratulations on that.");
-				}
 			}
 			else {
 				// Check if it contains a valid boolean expression in while condition
@@ -961,9 +956,20 @@ public class Validator {
 			// construct remainingCodeBlock
 			remainingCodeBlock = codeBlock.substring(endOfStatement + 1);
 		} else if(withSimpleMatcher.find()) { // we have a complex statement containing a simple statement
-			// find ; at end of simple statement contained in this complex statement
-			int endOfStatement = codeBlock.indexOf(';');
-			 statementToCheck = codeBlock.substring(0, endOfStatement + 1);
+			int endOfStatement;
+			
+			// check if it's a do-while
+			if(codeBlock.startsWith("do")) {
+				// there is a nested ; that we need to ignore
+				// the code block ends with the second ;
+				int indexOfFirstSemi = codeBlock.indexOf(';');
+				endOfStatement = codeBlock.indexOf(';', indexOfFirstSemi + 1);
+			} else {
+				// find ; at end of simple statement contained in this complex statement
+				endOfStatement = codeBlock.indexOf(';');
+			}
+			statementToCheck = codeBlock.substring(0, endOfStatement + 1);
+			
 			// pass to isValidComplexStatement
 			if (!isValidComplexStatement(statementToCheck)) {
 				throw new ParserException("I don't know how you got here, so congratulations on that.");
