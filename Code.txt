@@ -1,4 +1,4 @@
-static void TestMethodName(){
+private static void testmethod(){
 double m;
 int j;
 int i;
