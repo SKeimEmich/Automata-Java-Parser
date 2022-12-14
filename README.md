@@ -1,6 +1,10 @@
 # Automata-Java-Parser
 Parser for basic Java statement (limited to single method parsing with no library or class imports)
 
+Google Doc link for final definitions and contributions (Per assignment requirements)
+https://docs.google.com/document/d/1FIzxBgzkDR7rE23oBuvWadgyuqCUfLK05Yu3Hs-aUHw/edit?usp=sharing
+
+
 The Tigers - 
 Jonathan Espinosa
 Sam Keim
