@@ -47,5 +47,6 @@ class isValidMethodSigTests {
         assertTrue(validator.isValidMethodSignature("private static void testMethod()"));
         assertTrue(validator.isValidMethodSignature("public static void testMethod()"));
         assertTrue(validator.isValidMethodSignature("protected static void testMethod()"));
+        assertTrue(validator.isValidMethodSignature("static void testMethod()"));
     }
 }
