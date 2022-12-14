@@ -71,7 +71,7 @@ public class Validator {
 	private ArrayList<String> getReservedKeywords() {
 		Scanner s = null;
 		try {
-			s = new Scanner(new File("./Automata-Java-Parser/ReservedKeywords.txt"));
+			s = new Scanner(new File("ReservedKeywords.txt"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -459,15 +459,15 @@ public class Validator {
 	public boolean isValidMethodSignature(String methodSignature) {
 
 		// basic structure for method signature
-		if (methodSignature.matches("\\s*public\\s*static\\s*void\\s+[a-zA-z]+\\s*\\(\\s*\\)")) {
+		if (methodSignature.matches("\\s*(public|private|protected)?\\s*static\\s*void\\s+[a-zA-z]+\\s*\\(\\s*\\)")) {
 
 			// get substring up to opening parentheses of method declaration, split it into
 			// tokens
-			String subString = methodSignature.substring(0, methodSignature.indexOf("("));
+			String subString = methodSignature.substring(methodSignature.indexOf("void"), methodSignature.indexOf("("));
 			String[] arr = subString.split("\\s");
 
-			// arr[3] should be the method name, if it is a reserved keyword throw exception
-			if (reservedKeywords.contains(arr[3])) {
+			// arr[1] should be the method name, if it is a reserved keyword throw exception
+			if (reservedKeywords.contains(arr[1])) {
 				throw new ParserException(String.format("%s is a reserved keyword.", arr[1]));
 			} else
 				return true;

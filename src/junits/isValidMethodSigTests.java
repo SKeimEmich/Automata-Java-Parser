@@ -42,4 +42,10 @@ class isValidMethodSigTests {
         assertThrows(ParserException.class, () -> validator.isValidMethodSignature("public static void enum()"));
     }
 
+    @Test
+    void testAccessModifiers() {
+        assertTrue(validator.isValidMethodSignature("private static void testMethod()"));
+        assertTrue(validator.isValidMethodSignature("public static void testMethod()"));
+        assertTrue(validator.isValidMethodSignature("protected static void testMethod()"));
+    }
 }
